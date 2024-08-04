@@ -30,3 +30,12 @@
 *.exe
 *.out
 *.app
+
+# Ignore Python bytecode and cache directories
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignore build directories (common naming conventions)
+build/
+dist/
