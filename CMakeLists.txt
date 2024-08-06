@@ -25,7 +25,6 @@ add_library(mlx_cluster)
 
 target_sources(mlx_cluster
 PUBLIC
-${CMAKE_CURRENT_LIST_DIR}/random_walks/AddTwoNumbers.cpp
 ${CMAKE_CURRENT_LIST_DIR}/random_walks/RandomWalk.cpp
 )
 

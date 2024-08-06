@@ -8,27 +8,6 @@ using namespace nb::literals;
 using namespace mlx::core;
 
 NB_MODULE(_ext, m){
-    m.def(
-      "addTwoNumbers",
-      &addTwoNumbers,
-      "x"_a,
-      "y"_a,
-      nb::kw_only(),
-      "stream"_a = nb::none(),
-      R"(
-        Add two floating point arrays 
-        ``z = x + y``
-
-        Follows numpy style broadcasting between ``x`` and ``y``
-        Inputs are upcasted to floats if needed
-
-        Args:
-            x (array): Input array.
-            y (array): Input array.
-
-        Returns:
-            array: ``x + y``
-      )");
 
       m.def(
         "random_walk",
