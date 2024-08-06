@@ -36,6 +36,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Ignore 
+*.egg-info
+
 # Ignore build directories (common naming conventions)
 build/
 dist/
