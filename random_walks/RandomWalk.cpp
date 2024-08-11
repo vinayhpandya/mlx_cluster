@@ -8,6 +8,10 @@
 #include "mlx/random.h"
 #include "mlx/ops.h"
 #include "mlx/array.h"
+#ifdef _METAL_
+#include "mlx/backend/metal/device.h"
+#include "mlx/backend/metal/utils.h"
+#endif
 #include "random_walks/RandomWalk.h"
 
 namespace mlx::core {
@@ -74,7 +78,38 @@ void RandomWalk::eval_gpu(
         const std::vector<array>& input,
         std::vector<array>& output
     ){
-       throw std::runtime_error("Random walk has no GPU implementation.");
+       auto& rowptr = input[0];
+        auto& col = input[1];
+        auto& start = input[2];
+        int numel = start.size();
+
+        auto rand = random::uniform({numel, walk_length_});
+        rand.eval();
+
+        assert(output.size() == 2);
+        output[0].set_data(allocator::malloc_or_wait(numel * (walk_length_ + 1) * sizeof(int32_t)));
+        output[1].set_data(allocator::malloc_or_wait(numel * walk_length_ * sizeof(int32_t)));
+        auto& s = stream();
+        auto& d = metal::device(s.device);
+
+        d.register_library("random_walk_lib", metal::get_colocated_mtllib_path);
+        auto kernel = d.get_kernel("random_walk", "random_walk_lib");
+
+        auto& compute_encoder = d.get_command_encoder(s.index);
+        compute_encoder->setComputePipelineState(kernel);
+
+        compute_encoder.set_input_array(rowptr, 0);
+        compute_encoder.set_input_array(col, 1);
+        compute_encoder.set_input_array(start, 2);
+        compute_encoder.set_input_array(rand, 3);
+        compute_encoder.set_output_array(output[0], 4);
+        compute_encoder.set_output_array(output[1], 5);
+        compute_encoder->setBytes(&walk_length_, sizeof(int), 6);
+
+        MTL::Size grid_size = MTL::Size(numel, 1, 1);
+        MTL::Size thread_group_size = MTL::Size(kernel->maxTotalThreadsPerThreadgroup(), 1, 1);
+
+        compute_encoder.dispatchThreads(grid_size, thread_group_size);
     }
 
 std::vector<array> RandomWalk::vjp(

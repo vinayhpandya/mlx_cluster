@@ -34,6 +34,22 @@ ${CMAKE_CURRENT_LIST_DIR})
 
 target_link_libraries(mlx_cluster PUBLIC mlx)
 
+
+if(MLX_BUILD_METAL)
+  mlx_build_metallib(
+    TARGET mlx_cluster_metallib
+    TITLE mlx_cluster
+    SOURCES ${CMAKE_CURRENT_LIST_DIR}/random_walks/random_walk.metal
+    INCLUDE_DIRS ${PROJECT_SOURCE_DIR} ${MLX_INCLUDE_DIRS}
+    OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+  )
+
+  add_dependencies(
+    mlx_cluster
+    mlx_cluster_metallib
+  )
+
+endif()
 # ----- Nanobind module -----
 nanobind_add_module(
   _ext

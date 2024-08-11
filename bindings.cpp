@@ -1,6 +1,5 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/variant.h>
-#include <random_walks/AddTwoNumbers.h>
 #include <random_walks/RandomWalk.h>
 
 namespace nb = nanobind;
