@@ -4,7 +4,14 @@ A C++ extension for generating ramdom walks for Homogeneous graphs using mlx
 
 ## Installation
 
-To install the necessary dependencies, run:
+To install the necessary dependencies:
+
+Clone the repositories:
+```bash
+git clone https://github.com/vinayhpandya/mlx_cluster.git
+```
+
+After cloning the repository install library using 
 
 ```bash
 python setup.py build_ext -j8 --inplace
@@ -31,8 +38,9 @@ row_mlx = sorted_edge_index[0][0]
 col_mlx = sorted_edge_index[0][1]
 unique_vals, counts_mlx = np.unique(np.array(row_mlx, copy=False), return_counts=True)
 cum_sum_mlx = counts_mlx.cumsum()
+rand = mx.random.uniform(shape=[start.shape[0], 100])
 row_ptr_mlx = mx.concatenate([mx.array([0]), mx.array(cum_sum_mlx)])
-random_walk(row_ptr_mlx, col_mlx, start, 1000, stream = mx.cpu)
+random_walk(row_ptr_mlx, col_mlx, start, rand, 1000, stream = mx.gpu)
 ```
 
 ## TODO
