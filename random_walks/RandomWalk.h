@@ -56,6 +56,7 @@ namespace mlx::core{
     array random_walk(const array& rowptr,
      const array& col,
     const array& start,
+    const array& rand,
        int walk_length,
         StreamOrDevice s = {});
 

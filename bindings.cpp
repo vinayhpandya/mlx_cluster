@@ -14,6 +14,7 @@ NB_MODULE(_ext, m){
         "rowptr"_a,
         "col"_a,
         "start"_a,
+        "rand"_a,
         "walk_length"_a,
         nb::kw_only(),
       "stream"_a = nb::none(),
