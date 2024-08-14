@@ -45,9 +45,9 @@ random_walk(row_ptr_mlx, col_mlx, start, rand, 1000, stream = mx.gpu)
 
 ## TODO
 
-1. Add metal shaders to optimize the code
-2. Benchmark random walk against different frameworks
-3. Add more agorithms
+- [x] Add metal shaders to optimize the code
+- [ ] Benchmark random walk against different frameworks
+- [ ] Add more algorithms
 
 ## Credits:
 
