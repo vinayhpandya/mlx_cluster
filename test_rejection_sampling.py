@@ -17,14 +17,14 @@ row, col = sort_edge_index(edge_index=edge_index_torch, num_nodes=num_nodes)
 row_ptr, col = index2ptr(row, num_nodes), col
 loader = DataLoader(range(2708), batch_size=2000)
 start_indices = next(iter(loader))
-random_walks = torch.ops.torch_cluster.random_walk(
-    row_ptr, col, start_indices, 5, 1.0, 1.0
-)
+# random_walks = torch.ops.torch_cluster.random_walk(
+#     row_ptr, col, start_indices, 5, 1.0, 3.0
+# )
 
 from mlx_graphs.datasets import PlanetoidDataset
 from mlx_graphs.utils.sorting import sort_edge_index
 from torch.utils.data import DataLoader
-from mlx_cluster import random_walk
+from mlx_cluster import rejection_sampling
 
 cora_dataset = PlanetoidDataset(name="cora", base_dir="~")
 edge_index = cora_dataset.graphs[0].edge_index.astype(mx.int64)
@@ -42,9 +42,8 @@ assert mx.array_equal(row_ptr_mlx, mx.array(row_ptr.numpy())), "Arrays not equal
 assert mx.array_equal(col_mlx, mx.array(col.numpy())), "Col arrays are not equal"
 rand_data = mx.random.uniform(shape=[start_indices.shape[0], 5])
 start_time = time.time()
-node_sequence = random_walk(
-    row_ptr_mlx, col_mlx, start_indices, rand_data, 5, stream=mx.gpu
+node_sequence = rejection_sampling(
+    row_ptr_mlx, col_mlx, start_indices, 5, 1.0, 3.0, stream=mx.cpu
 )
 # print("Time taken to complete 1000 random walks : ", time.time() - start_time)
-print(random_walks[0])
 print(node_sequence)
