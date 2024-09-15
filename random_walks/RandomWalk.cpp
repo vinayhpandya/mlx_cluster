@@ -25,30 +25,30 @@ namespace mlx::core {
     // Initialize outputs
     assert(outputs.size() == 2);
     // Allocate memory for outputs if not already allocated
-    outputs[0].set_data(allocator::malloc_or_wait(numel*(walk_length_+1)*sizeof(int32_t)));
-    outputs[1].set_data(allocator::malloc_or_wait(numel*walk_length_*sizeof(int32_t)));
+    outputs[0].set_data(allocator::malloc_or_wait(numel*(walk_length_+1)*sizeof(int64_t)));
+    outputs[1].set_data(allocator::malloc_or_wait(numel*walk_length_*sizeof(int64_t)));
     auto& n_out = outputs[0];
     auto& e_out = outputs[1];
 
-    auto* n_out_ptr = n_out.data<int32_t>();
-    auto* e_out_ptr = e_out.data<int32_t>();
-    auto* start_values = start.data<int32_t>();
+    auto* n_out_ptr = n_out.data<int64_t>();
+    auto* e_out_ptr = e_out.data<int64_t>();
+    auto* start_values = start.data<int64_t>();
     auto* row_ptr = rowptr.data<int64_t>();
-    auto* col_values = col.data<int32_t>();
+    auto* col_values = col.data<int64_t>();
     auto* rand_values = rand.data<float>();
 
-    for (int32_t n = 0; n < numel; n++) {
-        int32_t n_cur = start_values[n];
+    for (int64_t n = 0; n < numel; n++) {
+        int64_t n_cur = start_values[n];
         n_out_ptr[n * (walk_length_ + 1)] = n_cur;
         for (int l = 0; l < walk_length_; l++) {
-            int32_t row_start = row_ptr[n_cur];
-            int32_t row_end = row_ptr[n_cur+1];
-            int32_t e_cur;
+            int64_t row_start = row_ptr[n_cur];
+            int64_t row_end = row_ptr[n_cur+1];
+            int64_t e_cur;
             if (row_end - row_start == 0) {
                 e_cur = -1;
             } else {
                 float r = rand_values[n*walk_length_+l];
-                int32_t idx = static_cast<int32_t>(r * (row_end - row_start));
+                int64_t idx = static_cast<int64_t>(r * (row_end - row_start));
                 e_cur = row_start + idx;
                 n_cur = col_values[e_cur];
             }

@@ -160,7 +160,7 @@ std::vector<array> BiasedRandomWalk::vjp(
     const std::vector<array>& outputs)
 {
     // Random walk is not differentiable, so we return zero gradients
-    throw std::runtime_error("Random walk has no GPU implementation.");
+    throw std::runtime_error("Random walk has no JVP implementation.");
 }
 
 std::pair<std::vector<array>, std::vector<int>> BiasedRandomWalk::vmap(
