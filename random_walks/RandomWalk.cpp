@@ -80,13 +80,13 @@ void RandomWalk::eval_gpu(
         int numel = start.size();
         
         assert(outputs.size() == 2);
-        outputs[0].set_data(allocator::malloc_or_wait(numel * (walk_length_ + 1) * sizeof(int32_t)));
-        outputs[1].set_data(allocator::malloc_or_wait(numel * walk_length_ * sizeof(int32_t)));
+        outputs[0].set_data(allocator::malloc_or_wait(numel * (walk_length_ + 1) * sizeof(int64_t)));
+        outputs[1].set_data(allocator::malloc_or_wait(numel * walk_length_ * sizeof(int64_t)));
         std::cout<<"after setting data"<<std::endl;
         auto& s = stream();
         auto& d = metal::device(s.device);
 
-        d.register_library("mlx_cluster", metal::get_colocated_mtllib_path);
+        d.register_library("mlx_cluster");
         auto kernel = d.get_kernel("random_walk", "mlx_cluster");
 
         auto& compute_encoder = d.get_command_encoder(s.index);

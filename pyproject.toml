@@ -1,3 +1,28 @@
+[project]
+name = "mlx_cluster"
+version = "0.0.1"
+authors = [
+  { name = "Vinay Pandya", email = "vinayharshadpandya27@gmail.com" },
+]
+description = "C++ and Metal extensions for MLX CTC Loss"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: C++",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+
+[project.optional-dependencies]
+dev = []
+
+[project.urls]
+Homepage = "https://github.com/vinayhpandya/mlx_cluster"
+Issues = "https://github.com/vinayhpandya/mlx_cluster/Issues"
+
+
 [build-system]
 requires = [
   "setuptools>=42",
