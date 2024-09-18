@@ -4,7 +4,7 @@ from mlx import extension
 if __name__ == "__main__":
     setup(
         name="mlx_cluster",
-        version="0.0.1",
+        version="0.0.2",
         description="Sample C++ and Metal extensions for MLX primitives.",
         ext_modules=[extension.CMakeExtension("mlx_cluster._ext")],
         cmdclass={"build_ext": extension.CMakeBuild},
