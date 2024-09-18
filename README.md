@@ -1,6 +1,6 @@
 # mlx_cluster
 
-A C++ extension for generating ramdom walks for Homogeneous graphs using mlx
+A C++ extension for generating random walks for Homogeneous graphs using mlx
 
 ## Installation
 
@@ -17,7 +17,13 @@ After cloning the repository install library using
 python setup.py build_ext -j8 --inplace
 ```
 
-for testing purposes you need to have `mlx-graphs` installed
+You can also just install the library via pip
+
+```bash
+pip install mlx_cluster
+```
+
+for testing purposes you need to have `mlx-graphs`  and `torch_geometric` installed
 
 ## Usage
 
@@ -31,7 +37,7 @@ from mlx_graphs_extension import random_walk
 cora_dataset = PlanetoidDataset(name="cora", base_dir="~")
 start = mx.arange(0, 1000)
 start_time = time.time()
-edge_index = cora_dataset.graphs[0].edge_index
+edge_index = cora_dataset.graphs[0].edge_index.astype(mx.int64)
 num_nodes = cora_dataset.graphs[0].num_nodes
 sorted_edge_index = sort_edge_index(edge_index=edge_index)
 row_mlx = sorted_edge_index[0][0]
