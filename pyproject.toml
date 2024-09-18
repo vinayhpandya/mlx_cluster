@@ -29,5 +29,6 @@ requires = [
   "cmake>=3.24",
   "mlx==0.15.*",
   "nanobind@git+https://github.com/wjakob/nanobind.git@2f04eac452a6d9142dedb957701bdb20125561e4",
+  "fmt"
 ]
 build-backend = "setuptools.build_meta"
