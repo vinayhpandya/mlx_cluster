@@ -9,6 +9,13 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 option(BUILD_SHARED_LIBS "Build extensions as a shared library" ON)
 
 # ----- Dependencies required ----
+# Optionally set the path to fmt if CMake cannot find it
+set(FMT_DIR "" CACHE PATH "Path to fmt installation")
+
+if(FMT_DIR)
+    set(CMAKE_PREFIX_PATH "${FMT_DIR}" ${CMAKE_PREFIX_PATH})
+endif()
+
 find_package(fmt REQUIRED)
 find_package(MLX CONFIG REQUIRED)
 find_package(Python 3.8 COMPONENTS Interpreter Development.Module REQUIRED)

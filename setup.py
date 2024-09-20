@@ -10,7 +10,7 @@ if __name__ == "__main__":
         cmdclass={"build_ext": extension.CMakeBuild},
         packages=["mlx_cluster"],
         package_data={"mlx_cluster": ["*.so", "*.dylib", "*.metallib"]},
-        extras_require={"dev": [], "test": ["torch_geometric", "pytest"]},
+        extras_require={"dev": [], "test": ["mlx_graphs", "torch_geometric", "pytest"]},
         zip_safe=False,
         python_requires=">=3.8",
     )
