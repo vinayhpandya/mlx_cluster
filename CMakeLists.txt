@@ -9,12 +9,13 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 option(BUILD_SHARED_LIBS "Build extensions as a shared library" ON)
 
 # ----- Dependencies required ----
-# Optionally set the path to fmt if CMake cannot find it
-set(FMT_DIR "" CACHE PATH "Path to fmt installation")
-
-if(FMT_DIR)
-    set(CMAKE_PREFIX_PATH "${FMT_DIR}" ${CMAKE_PREFIX_PATH})
-endif()
+include(FetchContent)
+FetchContent_declare(
+  fmt
+  GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+  GIT_TAG 10.2.1
+  EXCLUDE_FROM_ALL)
+FetchContent_MakeAvailable(fmt)
 
 find_package(fmt REQUIRED)
 find_package(MLX CONFIG REQUIRED)
