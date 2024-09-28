@@ -35,9 +35,6 @@ _, counts_mlx = np.unique(np.array(row_mlx, copy=False), return_counts=True)
 cum_sum_mlx = counts_mlx.cumsum()
 row_ptr_mlx = mx.concatenate([mx.array([0]), mx.array(cum_sum_mlx)])
 start_indices = mx.array(start_indices.numpy())
-print("row pointer datatype", row_ptr_mlx.dtype)
-print("col datatype", col_mlx.dtype)
-print("start pointer datatype", start_indices.dtype)
 assert mx.array_equal(row_ptr_mlx, mx.array(row_ptr.numpy())), "Arrays not equal"
 assert mx.array_equal(col_mlx, mx.array(col.numpy())), "Col arrays are not equal"
 rand_data = mx.random.uniform(shape=[start_indices.shape[0], 5])

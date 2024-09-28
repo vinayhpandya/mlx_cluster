@@ -37,6 +37,7 @@ namespace mlx::core {
     auto* col_values = col.data<int64_t>();
     auto* rand_values = rand.data<float>();
 
+    std::cout<<"After evaluating outputs"<<std::endl;
     for (int64_t n = 0; n < numel; n++) {
         int64_t n_cur = start_values[n];
         n_out_ptr[n * (walk_length_ + 1)] = n_cur;
