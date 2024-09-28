@@ -20,7 +20,6 @@ dev = []
 test = [
   "pytest==7.4.4",
   "scipy==1.12.0",
-  "torch==2.2.0",
   "torch_geometric==2.5.0",
   "torch_cluster==1.6.3",
 ]
