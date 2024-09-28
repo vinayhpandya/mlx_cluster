@@ -12,7 +12,7 @@ if __name__ == "__main__":
         package_data={"mlx_cluster": ["*.so", "*.dylib", "*.metallib"]},
         extras_require={
             "dev": [],
-            "test": ["mlx_graphs", "torch", "torch_geometric", "pytest"],
+            "test": ["mlx_graphs", "torch", "scipy", "torch_geometric", "pytest"],
         },
         zip_safe=False,
         python_requires=">=3.8",
