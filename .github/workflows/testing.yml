@@ -23,6 +23,7 @@ jobs:
     - name: Install package and dependencies
       run: |
         python -m pip install --upgrade pip
+        python setup.py build_ext -j8 --inplace
         pip install .[test]
     - name: Run tests with pytest
       run: |
