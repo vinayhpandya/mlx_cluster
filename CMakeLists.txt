@@ -9,15 +9,6 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 option(BUILD_SHARED_LIBS "Build extensions as a shared library" ON)
 
 # ----- Dependencies required ----
-include(FetchContent)
-FetchContent_declare(
-  fmt
-  GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-  GIT_TAG 10.2.1
-  EXCLUDE_FROM_ALL)
-FetchContent_MakeAvailable(fmt)
-
-find_package(fmt REQUIRED)
 find_package(MLX CONFIG REQUIRED)
 find_package(Python 3.8 COMPONENTS Interpreter Development.Module REQUIRED)
 execute_process(
