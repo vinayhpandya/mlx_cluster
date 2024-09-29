@@ -137,6 +137,7 @@ std::vector<std::vector<int>> RandomWalk::output_shapes(const std::vector<array>
 
 array random_walk(const array& rowptr, const array& col, const array& start, const array& rand, int walk_length, StreamOrDevice s)
 {   
+    std::cout<<"Inside random walk"<<std::endl;
     int nodes = start.size();
     auto primitive = std::make_shared<RandomWalk>(walk_length, to_stream(s));
     return array::make_arrays({{nodes,walk_length+1},{nodes, walk_length}},
