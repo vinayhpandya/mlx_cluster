@@ -29,24 +29,37 @@ for testing purposes you need to have `mlx-graphs`  and `torch_geometric` instal
 
 
 ```
-from mlx_graphs.utils.sorting import sort_edge_index
-from mlx_graphs.loaders import Dataloader
-from mlx_graphs_extension import random_walk
+# Can also use mlx for generating starting indices
+import torch
+from torch.utils.data import DataLoader
 
+loader = DataLoader(range(2708), batch_size=2000)
+start_indices = next(iter(loader))
+
+
+from mlx_graphs.datasets import PlanetoidDataset
+from mlx_graphs.utils.sorting import sort_edge_index
+from torch.utils.data import DataLoader
+from mlx_cluster import random_walk
 
 cora_dataset = PlanetoidDataset(name="cora", base_dir="~")
-start = mx.arange(0, 1000)
-start_time = time.time()
+# For some reason int_64t and int_32t are not compatible
 edge_index = cora_dataset.graphs[0].edge_index.astype(mx.int64)
-num_nodes = cora_dataset.graphs[0].num_nodes
+
+# Convert edge index into a CSR matrix
 sorted_edge_index = sort_edge_index(edge_index=edge_index)
 row_mlx = sorted_edge_index[0][0]
 col_mlx = sorted_edge_index[0][1]
-unique_vals, counts_mlx = np.unique(np.array(row_mlx, copy=False), return_counts=True)
+_, counts_mlx = np.unique(np.array(row_mlx, copy=False), return_counts=True)
 cum_sum_mlx = counts_mlx.cumsum()
-rand = mx.random.uniform(shape=[start.shape[0], 100])
 row_ptr_mlx = mx.concatenate([mx.array([0]), mx.array(cum_sum_mlx)])
-random_walk(row_ptr_mlx, col_mlx, start, rand, 1000, stream = mx.gpu)
+start_indices = mx.array(start_indices.numpy())
+
+rand_data = mx.random.uniform(shape=[start_indices.shape[0], 5])
+
+node_sequence = random_walk(
+    row_ptr_mlx, col_mlx, start_indices, rand_data, 5, stream=mx.cpu
+)
 ```
 
 ## TODO
