@@ -4,49 +4,48 @@
 #include <mlx/ops.h>
 #include <mlx/primitives.h>
 
-namespace mlx::core{
+namespace mx = mlx::core;
+namespace mlx_biased_random_walk{
 
-    class BiasedRandomWalk : public Primitive {
+    class BiasedRandomWalk : public mx::Primitive {
         public:
-            BiasedRandomWalk(Stream stream, int walk_length, double p, double q)
-            : Primitive(stream), walk_length_(walk_length), p_(p), q_(q) {}
-            void eval_cpu(const std::vector<array>& inputs, std::vector<array>& outputs)
+            BiasedRandomWalk(mx::Stream stream, int walk_length, double p, double q)
+            : mx::Primitive(stream), walk_length_(walk_length), p_(p), q_(q) {}
+            void eval_cpu(const std::vector<mx::array>& inputs, std::vector<mx::array>& outputs)
             override;
-            void eval_gpu(const std::vector<array>& inputs, std::vector<array>& outputs)
+            void eval_gpu(const std::vector<mx::array>& inputs, std::vector<mx::array>& outputs)
             override;
 
             /** The Jacobian-vector product. */
-            std::vector<array> jvp(
-                const std::vector<array>& primals,
-                const std::vector<array>& tangents,
+            std::vector<mx::array> jvp(
+                const std::vector<mx::array>& primals,
+                const std::vector<mx::array>& tangents,
                 const std::vector<int>& argnums) override;
-
+          
             /** The vector-Jacobian product. */
-            std::vector<array> vjp(
-                const std::vector<array>& primals,
-                const std::vector<array>& cotangents,
+            std::vector<mx::array> vjp(
+                const std::vector<mx::array>& primals,
+                const std::vector<mx::array>& cotangents,
                 const std::vector<int>& argnums,
-                const std::vector<array>& outputs) override;
-
+                const std::vector<mx::array>& outputs) override;
+          
             /**
              * The primitive must know how to vectorize itself across
              * the given axes. The output is a pair containing the array
              * representing the vectorized computation and the axis which
              * corresponds to the output vectorized dimension.
              */
-            std::pair<std::vector<array>, std::vector<int>> vmap(
-                const std::vector<array>& inputs,
+            std::pair<std::vector<mx::array>, std::vector<int>> vmap(
+                const std::vector<mx::array>& inputs,
                 const std::vector<int>& axes) override;
 
             /** Print the primitive. */
-            void print(std::ostream& os) override {
-                os << "biased random walk implementation";
+            virtual const char* name() const override {
+                return "biased random walk implementation";
             }
 
             /** Equivalence check **/
-            bool is_equivalent(const Primitive& other) const override;
-
-            std::vector<std::vector<int>> output_shapes(const std::vector<array>& inputs) override;
+            bool is_equivalent(const mx::Primitive& other) const override;
         
         private:
             int walk_length_;
@@ -55,12 +54,12 @@ namespace mlx::core{
 
     };
 
-    array rejection_sampling(const array& rowptr,
-     const array& col,
-    const array& start,
+    mx::array rejection_sampling(const mx::array& rowptr,
+     const mx::array& col,
+    const mx::array& start,
        int walk_length,
        const double p, 
        const double q,
-        StreamOrDevice s = {});
+        mx::StreamOrDevice s = {});
 
 };

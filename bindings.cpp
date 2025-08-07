@@ -11,7 +11,7 @@ NB_MODULE(_ext, m){
 
       m.def(
         "random_walk",
-        &random_walk,
+        &mlx_random_walk::random_walk,
         "rowptr"_a,
         "col"_a,
         "start"_a,
@@ -34,7 +34,7 @@ NB_MODULE(_ext, m){
 
       m.def(
         "rejection_sampling",
-        &rejection_sampling,
+        &mlx_biased_random_walk::rejection_sampling,
         "rowptr"_a,
         "col"_a,
         "start"_a,
@@ -62,4 +62,3 @@ NB_MODULE(_ext, m){
             array: consisting of nodes visited on random walk
       )");
 }
-

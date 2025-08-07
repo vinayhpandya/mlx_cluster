@@ -14,25 +14,53 @@ from mlx_graphs.datasets import PlanetoidDataset
 from mlx_graphs.utils.sorting import sort_edge_index
 from torch.utils.data import DataLoader
 from mlx_cluster import random_walk
+import pytest
+import time
 
-cora_dataset = PlanetoidDataset(name="cora", base_dir="~")
-# For some reason int_64t and int_32t are not compatible
-edge_index = cora_dataset.graphs[0].edge_index.astype(mx.int64)
+@pytest.mark.slow  # give download/compile plenty of time on CI
+def test_random_walk(tmp_path):
+    """
+    Runs 1 000 random walks of length 10 on the Cora graph and checks:
+    1. output tensor shape == (num_start_nodes, walk_length + 1)
+    2. all returned node indices are valid ( < num_nodes )
+    """
 
-# Convert edge index into a CSR matrix
-sorted_edge_index = sort_edge_index(edge_index=edge_index)
-row_mlx = sorted_edge_index[0][0]
-col_mlx = sorted_edge_index[0][1]
-_, counts_mlx = np.unique(np.array(row_mlx, copy=False), return_counts=True)
-cum_sum_mlx = counts_mlx.cumsum()
-row_ptr_mlx = mx.concatenate([mx.array([0]), mx.array(cum_sum_mlx)])
-start_indices = mx.array(start_indices.numpy())
+    # ---------- Dataset (downloaded to the temp dir) ----------
+    data_dir = tmp_path / "mlx_datasets"
+    cora = PlanetoidDataset(name="cora", base_dir=data_dir)
 
-rand_data = mx.random.uniform(shape=[start_indices.shape[0], 5])
-start_time = time.time()
+    edge_index = cora.graphs[0].edge_index.astype(mx.int64)
 
-node_sequence = random_walk(
-    row_ptr_mlx, col_mlx, start_indices, rand_data, 5, stream=mx.cpu
-)
-print("Time taken to complete 1000 random walks : ", time.time() - start_time)
-print("MLX random walks are", node_sequence)
+    # CSR conversion
+    sorted_edge_index = sort_edge_index(edge_index=edge_index)
+    row = sorted_edge_index[0][0]
+    col = sorted_edge_index[0][1]
+    _, counts = np.unique(np.array(row, copy=False), return_counts=True)
+    row_ptr = mx.concatenate([mx.array([0]), mx.array(counts.cumsum())])
+
+    # pick 1 000 random start nodes
+    num_starts = 1_000
+    rng = np.random.default_rng(42)
+    start_idx = mx.array(rng.integers(low=0, high=row.max().item() + 1,
+                                      size=num_starts, dtype=np.int64))
+
+    # random numbers for the kernel (shape [num_starts, walk_length])
+    walk_len = 10
+    rand_data = mx.random.uniform(shape=[num_starts, walk_len])
+
+    # ---------- Warm-up ----------
+    mx.eval(row_ptr, col, start_idx, rand_data)
+
+    # ---------- Run kernel ----------
+    t0 = time.time()
+    node_seq = random_walk(row_ptr, col, start_idx, rand_data,
+                           walk_len, stream=mx.cpu)
+    elapsed = time.time() - t0
+    print(f"Random-walk kernel took {elapsed:.3f} s")
+    print("Node sequence is ", node_seq)
+    # ---------- Assertions ----------
+    assert node_seq.shape == (num_starts, walk_len + 1)
+
+    num_nodes = cora.graphs[0].num_nodes
+    assert (node_seq < num_nodes).all().item(), \
+        "Random walk produced invalid node indices"
