@@ -12,7 +12,7 @@ classifiers = [
   "Programming Language :: Python :: 3",
   "Programming Language :: C++",
   "License :: OSI Approved :: MIT License",
-  "Operating System :: Macos",
+  "Operating System :: MacOS",
 ]
 
 [project.optional-dependencies]
@@ -27,25 +27,22 @@ test = [
   "fsspec[http]==2024.2.0",
   "tqdm==4.66.1",
 ]
+
 [project.urls]
 Homepage = "https://github.com/vinayhpandya/mlx_cluster"
 Issues = "https://github.com/vinayhpandya/mlx_cluster/Issues"
 
 [tool.pytest.ini_options]
 addopts = "-ra"
-
 markers = [
-    #  ↓—— name of the mark ─────────────── description (shown with --markers)
     "slow: marks tests that download data, compile kernels, or are otherwise time-consuming (deselect with -m 'not slow')",
 ]
 
 [build-system]
 requires = [
+  "nanobind==2.4.0",
   "setuptools>=42",
   "cmake>=3.24",
-  "mlx>=0.26.0",
-  "nanobind==2.4.0",
+  "mlx>=0.26.0", 
 ]
-
-
 build-backend = "setuptools.build_meta"
