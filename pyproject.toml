@@ -31,6 +31,13 @@ test = [
 Homepage = "https://github.com/vinayhpandya/mlx_cluster"
 Issues = "https://github.com/vinayhpandya/mlx_cluster/Issues"
 
+[tool.pytest.ini_options]
+addopts = "-ra"
+
+markers = [
+    #  ↓—— name of the mark ─────────────── description (shown with --markers)
+    "slow: marks tests that download data, compile kernels, or are otherwise time-consuming (deselect with -m 'not slow')",
+]
 
 [build-system]
 requires = [

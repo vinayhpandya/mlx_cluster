@@ -52,7 +52,7 @@ namespace mlx_random_walk{
 
     };
 
-    mx::array random_walk(const mx::array& rowptr,
+    std::vector<mx::array> random_walk(const mx::array& rowptr,
      const mx::array& col,
     const mx::array& start,
     const mx::array& rand,

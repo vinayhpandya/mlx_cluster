@@ -140,7 +140,7 @@ bool RandomWalk::is_equivalent(const mx::Primitive& other) const
     throw std::runtime_error("Random walk has no GPU implementation.");
 }
 
-mx::array random_walk(const mx::array& rowptr, const mx::array& col, const mx::array& start, const mx::array& rand, int walk_length, mx::StreamOrDevice s)
+std::vector<mx::array> random_walk(const mx::array& rowptr, const mx::array& col, const mx::array& start, const mx::array& rand, int walk_length, mx::StreamOrDevice s)
 {   
     std::cout<<"Inside random walk"<<std::endl;
     int nodes = start.size();
@@ -149,6 +149,6 @@ mx::array random_walk(const mx::array& rowptr, const mx::array& col, const mx::a
      {start.dtype(), start.dtype()},
      primitive,
      {rowptr, col, start, rand}
-    )[0];
+    );
 }
 }

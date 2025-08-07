@@ -174,7 +174,7 @@ bool BiasedRandomWalk::is_equivalent(const mx::Primitive& other) const
     throw std::runtime_error("biased Random walk has no GPU implementation.");
 }
 
-mx::array rejection_sampling(const mx::array& rowptr, const mx::array& col, const mx::array& start, int walk_length, const double p, 
+std::vector<mx::array> rejection_sampling(const mx::array& rowptr, const mx::array& col, const mx::array& start, int walk_length, const double p, 
        const double q, mx::StreamOrDevice s)
 {   
     int nodes = start.size();
@@ -183,6 +183,6 @@ mx::array rejection_sampling(const mx::array& rowptr, const mx::array& col, cons
      {rowptr.dtype(), rowptr.dtype()},
      primitive,
      {rowptr, col, start}
-    )[0];
+    );
 }
 }

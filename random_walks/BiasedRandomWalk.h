@@ -54,7 +54,7 @@ namespace mlx_biased_random_walk{
 
     };
 
-    mx::array rejection_sampling(const mx::array& rowptr,
+    std::vector<mx::array> rejection_sampling(const mx::array& rowptr,
      const mx::array& col,
     const mx::array& start,
        int walk_length,
