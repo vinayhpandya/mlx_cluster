@@ -1,10 +1,10 @@
 [project]
 name = "mlx_cluster"
-version = "0.0.4"
+version = "0.0.5"
 authors = [
   { name = "Vinay Pandya", email = "vinayharshadpandya27@gmail.com" },
 ]
-description = "C++ and Metal extensions for MLX CTC Loss"
+description = "C++ extension for generating random graphs"
 readme = "README.md"
 requires-python = ">=3.10"
 classifiers = [
@@ -12,7 +12,7 @@ classifiers = [
   "Programming Language :: Python :: 3",
   "Programming Language :: C++",
   "License :: OSI Approved :: MIT License",
-  "Operating System :: OS Independent",
+  "Operating System :: Macos",
 ]
 
 [project.optional-dependencies]
