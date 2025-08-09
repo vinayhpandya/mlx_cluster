@@ -263,9 +263,7 @@
 <button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass fa-lg"></i>
 </button>
-<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="fa-solid fa-list"></span>
-</label>
+
 </div></div>
       
     </div>
@@ -281,15 +279,6 @@
     <div id="print-main-content">
         <div id="jb-print-toc">
             
-            <div>
-                <h2> Contents </h2>
-            </div>
-            <nav aria-label="Page">
-                <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mlx_cluster.random_walk"><code class="docutils literal notranslate"><span class="pre">random_walk()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mlx_cluster.rejection_sampling"><code class="docutils literal notranslate"><span class="pre">rejection_sampling()</span></code></a></li>
-</ul>
-            </nav>
         </div>
     </div>
 </div>
@@ -301,54 +290,6 @@
                   
   <section id="api-reference">
 <h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h1>
-<dl class="py function">
-<dt class="sig sig-object py" id="mlx_cluster.random_walk">
-<span class="sig-prename descclassname"><span class="pre">mlx_cluster.</span></span><span class="sig-name descname"><span class="pre">random_walk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rowptr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">mlx.core.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">mlx.core.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">mlx.core.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rand</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">mlx.core.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">walk_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">stream</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#mlx_cluster.random_walk" title="Link to this definition">#</a></dt>
-<dd><p>Uniform random walks.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>rowptr</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">array</span></code>) -- rowptr of graph in csr format.</p></li>
-<li><p><strong>col</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">array</span></code>) -- edges(col) in csr format.</p></li>
-<li><p><strong>start_indices</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">array</span></code>) -- starting nodes of graph from which
-sampling will be performed.</p></li>
-<li><p><strong>random_values</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">array</span></code>) -- random values (between 0 to 1)</p></li>
-<li><p><strong>walk_length</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) -- walk length of random graph</p></li>
-<li><p><strong>p</strong> -- Likelihood of immediately revisiting a node in the walk.</p></li>
-<li><p><strong>q</strong> -- Control parameter to interpolate between
-breadth-first strategy and depth-first strategy</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>(nodes, edges) tuple of arrays</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="mlx_cluster.rejection_sampling">
-<span class="sig-prename descclassname"><span class="pre">mlx_cluster.</span></span><span class="sig-name descname"><span class="pre">rejection_sampling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rowptr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">mlx.core.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">mlx.core.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">mlx.core.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">walk_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">stream</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#mlx_cluster.rejection_sampling" title="Link to this definition">#</a></dt>
-<dd><p>Sample nodes from the graph by sampling neighbors based
-on probablity p and q</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>rowptr</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">array</span></code>) -- rowptr of graph in csr format.</p></li>
-<li><p><strong>col</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">array</span></code>) -- edges in csr format.</p></li>
-<li><p><strong>start</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">array</span></code>) -- starting node of graph from which
-biased sampling will be performed.</p></li>
-<li><p><strong>walk_length</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) -- walk length of random graph</p></li>
-<li><p><strong>p</strong> -- Likelihood of immediately revisiting a node in the walk.</p></li>
-<li><p><strong>q</strong> -- Control parameter to interpolate between
-breadth-first strategy and depth-first strategy</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>(nodes, edges) tuple of arrays</p>
-</dd>
-</dl>
-</dd></dl>
-
 </section>
 
 
@@ -377,23 +318,6 @@ breadth-first strategy and depth-first strategy</p></li>
             </div>
             
             
-              
-                <dialog id="pst-secondary-sidebar-modal"></dialog>
-                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
-
-
-  <div class="sidebar-secondary-item">
-  <div class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> Contents
-  </div>
-  <nav class="bd-toc-nav page-toc">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mlx_cluster.random_walk"><code class="docutils literal notranslate"><span class="pre">random_walk()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mlx_cluster.rejection_sampling"><code class="docutils literal notranslate"><span class="pre">rejection_sampling()</span></code></a></li>
-</ul>
-  </nav></div>
-
-</div></div>
               
             
           </div>
