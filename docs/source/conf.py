@@ -7,7 +7,13 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../mlx_cluster'))
+sys.path.insert(0, os.path.abspath("../mlx_cluster"))
+
+try:
+    import mlx_cluster
+    print("mlx_cluster imported successfully!")
+except ImportError as e:
+    print("Failed to import mlx_cluster:", e)
 
 project = 'mlx-cluster'
 copyright = '2025, Vinay Pandya'
