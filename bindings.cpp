@@ -32,6 +32,17 @@ NB_MODULE(_ext, m){
       R"(
           Uniform random walks.
 
+          Args:
+            rowptr (array): rowptr of graph in csr format.
+            col (array): edges(col) in csr format.
+            start_indices (array): starting nodes of graph from which 
+                            sampling will be performed.
+            random_values (array): random values (between 0 to 1)
+            walk_length (int) : walk length of random graph
+            p : Likelihood of immediately revisiting a node in the walk.
+            q : Control parameter to interpolate between
+                breadth-first strategy and depth-first strategy
+
           Returns:
               (nodes, edges) tuple of arrays
       )",

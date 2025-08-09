@@ -42,3 +42,5 @@ __pycache__/
 # Ignore build directories (common naming conventions)
 build/
 dist/
+.vscode/
+docs/_build/
