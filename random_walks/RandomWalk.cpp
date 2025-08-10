@@ -33,7 +33,7 @@ namespace mlx_random_walk {
     auto& start = inputs[2];
     auto& rand = inputs[3];
     int numel = start.size();
-    std::cout<<"Its really inside cpu"<<std::endl;
+    // std::cout<<"Its really inside cpu"<<std::endl;
     // Initialize outputs
     assert(outputs.size() == 2);
     // Allocate memory for outputs if not already allocated
@@ -48,7 +48,6 @@ namespace mlx_random_walk {
     auto* row_ptr = rowptr.data<int64_t>();
     auto* col_values = col.data<int64_t>();
     auto* rand_values = rand.data<float>();
-
     for (int64_t n = 0; n < numel; n++) {
         int64_t n_cur = start_values[n];
         n_out_ptr[n * (walk_length_ + 1)] = n_cur;
@@ -69,7 +68,6 @@ namespace mlx_random_walk {
             e_out_ptr[n * walk_length_ + l] = e_cur;
         }
     }
-   
     };
 
     std::vector<mx::array> RandomWalk::jvp(
@@ -96,7 +94,7 @@ void RandomWalk::eval_gpu(
         outputs[1].set_data(mx::allocator::malloc(numel * walk_length_ * sizeof(int64_t)));
         auto& s = stream();
         auto& d = mx::metal::device(s.device);
-        std::cout<<"Its really inside gpu"<<std::endl;
+        // std::cout<<"Its really inside gpu"<<std::endl;
         auto lib = d.get_library("mlx_cluster", current_binary_dir());
         auto kernel = d.get_kernel("random_walk", lib);
 
@@ -142,8 +140,9 @@ bool RandomWalk::is_equivalent(const mx::Primitive& other) const
 
 std::vector<mx::array> random_walk(const mx::array& rowptr, const mx::array& col, const mx::array& start, const mx::array& rand, int walk_length, mx::StreamOrDevice s)
 {   
-    std::cout<<"Inside random walk"<<std::endl;
+    // std::cout<<"Inside random walk"<<std::endl;
     int nodes = start.size();
+
     auto primitive = std::make_shared<RandomWalk>(walk_length, to_stream(s));
     return mx::array::make_arrays({{nodes,walk_length+1},{nodes, walk_length}},
      {start.dtype(), start.dtype()},

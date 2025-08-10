@@ -33,15 +33,12 @@ NB_MODULE(_ext, m){
           Uniform random walks.
 
           Args:
-            rowptr (array): rowptr of graph in csr format.
-            col (array): edges(col) in csr format.
-            start_indices (array): starting nodes of graph from which 
+            rowptr (mlx.core.array): rowptr of graph in csr format.
+            col (mlx.core.array): edges(col) in csr format.
+            start_indices (mlx.core.array): starting nodes of graph from which 
                             sampling will be performed.
-            random_values (array): random values (between 0 to 1)
+            random_values (mlx.corearray): random values (between 0 to 1)
             walk_length (int) : walk length of random graph
-            p : Likelihood of immediately revisiting a node in the walk.
-            q : Control parameter to interpolate between
-                breadth-first strategy and depth-first strategy
 
           Returns:
               (nodes, edges) tuple of arrays
@@ -76,9 +73,9 @@ NB_MODULE(_ext, m){
         on probablity p and q
 
         Args:
-            rowptr (array): rowptr of graph in csr format.
-            col (array): edges in csr format.
-            start (array): starting node of graph from which 
+            rowptr (mlx.core.array): rowptr of graph in csr format.
+            col (mlx.core.array): edges in csr format.
+            start (mlx.core.array): starting node of graph from which 
                             biased sampling will be performed.
             walk_length (int) : walk length of random graph
             p : Likelihood of immediately revisiting a node in the walk.

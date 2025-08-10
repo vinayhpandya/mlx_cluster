@@ -32,9 +32,9 @@ namespace mlx_biased_random_walk {
         auto& rowptr = inputs[0];
         auto& col = inputs[1];
         auto& start = inputs[2];
-        auto& rand = inputs[3];
+        // auto& rand = inputs[3];
         int numel = start.size();
-        std::cout<<"Inside biased random walk"<<std::endl;
+        // std::cout<<"Inside biased random walk"<<std::endl;
         // Initialize outputs
         assert(outputs.size() == 2);
         // Allocate memory for outputs if not already allocated
@@ -47,8 +47,6 @@ namespace mlx_biased_random_walk {
         auto* start_values = start.data<int64_t>();
         auto* row_ptr = rowptr.data<int64_t>();
         auto* col_values = col.data<int64_t>();
-        auto* rand_values = rand.data<float>();
-
         double max_prob = fmax(fmax(1. / p_, 1.), 1. / q_);
         double prob_0 = 1. / p_ / max_prob;
         double prob_1 = 1. / max_prob;
@@ -57,6 +55,7 @@ namespace mlx_biased_random_walk {
         for (int64_t n = 0; n < numel; n++) {
             int64_t t = start_values[n], v, x, e_cur, row_start, row_end;
             n_out_ptr[n * (walk_length_ + 1)] = t;
+           
             row_start = row_ptr[t], row_end = row_ptr[t + 1];
             if (row_end - row_start == 0) {
                 e_cur = -1;
@@ -97,7 +96,6 @@ namespace mlx_biased_random_walk {
                 v = x;
             }
         }
-   
     };
 
     std::vector<mx::array> BiasedRandomWalk::jvp(
