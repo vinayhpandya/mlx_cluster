@@ -42,6 +42,11 @@ typehints_use_signature_return = True
 autosummary_generate = True
 
 
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
+    'mlx': ('https://ml-explore.github.io/mlx/build/html/', None)
+}
 templates_path = ['_templates']
 exclude_patterns = ["_build", "**.ipynb_checkpoints"]
 
@@ -55,3 +60,16 @@ master_doc = "index"
 html_theme = 'sphinx_book_theme'
 html_static_path = ['_static']
 html_title = "mlx-cluster documentation"
+
+html_theme_options = {
+    "repository_url": "https://github.com/vinayhpandya/mlx_cluster",  # Replace with your actual GitHub URL
+    "use_repository_button": True,
+    "use_issues_button": True,
+    "use_edit_page_button": True,
+    "show_navbar_depth": 2,
+    "logo": {
+        "text": "MLX-Cluster",
+    },
+    "home_page_in_toc": True,
+    "github_url": "https://github.com/vinayhpandya/mlx_cluster",  # Alternative way to add GitHub link
+}
