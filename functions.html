@@ -308,15 +308,12 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>rowptr</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">array</span></code>) -- rowptr of graph in csr format.</p></li>
-<li><p><strong>col</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">array</span></code>) -- edges(col) in csr format.</p></li>
-<li><p><strong>start_indices</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">array</span></code>) -- starting nodes of graph from which
+<li><p><strong>rowptr</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">mlx.core.array</span></code>) -- rowptr of graph in csr format.</p></li>
+<li><p><strong>col</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">mlx.core.array</span></code>) -- edges(col) in csr format.</p></li>
+<li><p><strong>start_indices</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">mlx.core.array</span></code>) -- starting nodes of graph from which
 sampling will be performed.</p></li>
-<li><p><strong>random_values</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">array</span></code>) -- random values (between 0 to 1)</p></li>
+<li><p><strong>random_values</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">mlx.corearray</span></code>) -- random values (between 0 to 1)</p></li>
 <li><p><strong>walk_length</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) -- walk length of random graph</p></li>
-<li><p><strong>p</strong> -- Likelihood of immediately revisiting a node in the walk.</p></li>
-<li><p><strong>q</strong> -- Control parameter to interpolate between
-breadth-first strategy and depth-first strategy</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -333,9 +330,9 @@ on probablity p and q</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>rowptr</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">array</span></code>) -- rowptr of graph in csr format.</p></li>
-<li><p><strong>col</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">array</span></code>) -- edges in csr format.</p></li>
-<li><p><strong>start</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">array</span></code>) -- starting node of graph from which
+<li><p><strong>rowptr</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">mlx.core.array</span></code>) -- rowptr of graph in csr format.</p></li>
+<li><p><strong>col</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">mlx.core.array</span></code>) -- edges in csr format.</p></li>
+<li><p><strong>start</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">mlx.core.array</span></code>) -- starting node of graph from which
 biased sampling will be performed.</p></li>
 <li><p><strong>walk_length</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) -- walk length of random graph</p></li>
 <li><p><strong>p</strong> -- Likelihood of immediately revisiting a node in the walk.</p></li>
