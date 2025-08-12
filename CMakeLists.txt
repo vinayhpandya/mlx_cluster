@@ -17,6 +17,15 @@ execute_process(
 list(APPEND CMAKE_PREFIX_PATH "${NB_DIR}")
 find_package(nanobind CONFIG REQUIRED)
 
+include(FetchContent)
+
+FetchContent_Declare(
+  parallel-hashmap
+  GIT_REPOSITORY https://github.com/greg7mdp/parallel-hashmap.git
+  GIT_TAG        v1.4.1  # Use latest stable version
+)
+
+FetchContent_MakeAvailable(parallel-hashmap)
 # ------ Adding extensions to the library -----
 
 # Add library
@@ -26,13 +35,14 @@ target_sources(mlx_cluster
 PUBLIC
 ${CMAKE_CURRENT_LIST_DIR}/random_walks/RandomWalk.cpp
 ${CMAKE_CURRENT_LIST_DIR}/random_walks/BiasedRandomWalk.cpp
+${CMAKE_CURRENT_LIST_DIR}/random_walks/NeighborSample.cpp
 )
 
 target_include_directories(mlx_cluster
 PUBLIC
 ${CMAKE_CURRENT_LIST_DIR})
 
-target_link_libraries(mlx_cluster PUBLIC mlx)
+target_link_libraries(mlx_cluster PUBLIC mlx phmap)
 
 
 if(MLX_BUILD_METAL)

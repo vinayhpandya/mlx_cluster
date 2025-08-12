@@ -1,6 +1,8 @@
 name: build-sphinx-docs
 
 on:
+  push:
+    branches: [ "main" ]
   release:
     types: [published]
   workflow_dispatch:

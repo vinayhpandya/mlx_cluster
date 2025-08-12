@@ -2,7 +2,8 @@
 #include <nanobind/stl/variant.h>
 #include <random_walks/RandomWalk.h>
 #include <random_walks/BiasedRandomWalk.h>
-
+#include <nanobind/stl/vector.h>
+#include <random_walks/NeighborSample.h>
 namespace nb = nanobind;
 using namespace nb::literals;
 using namespace mlx::core;
@@ -86,4 +87,47 @@ NB_MODULE(_ext, m){
             (nodes, edges) tuple of arrays
       )",
       nb::rv_policy::move);
-}
+
+      m.def(
+        "neighbor_sample",
+        [](const mx::array& colptr,
+           const mx::array& row,
+           const mx::array& input_node,
+           const std::vector<int64_t>& num_neighbors,
+           bool replace = false,
+           bool directed = true) {
+            
+            // Call your C++ function
+            auto result = neighbor_sample(colptr, row, input_node, num_neighbors, replace, directed);
+            
+            // Convert std::tuple to nanobind tuple with move semantics
+            return nb::make_tuple(
+                std::move(std::get<0>(result)),  // samples
+                std::move(std::get<1>(result)),  // rows
+                std::move(std::get<2>(result)),  // cols
+                std::move(std::get<3>(result))   // edges
+            );
+        },
+        "colptr"_a,
+        "row"_a, 
+        "input_node"_a,
+        "num_neighbors"_a,
+        "replace"_a = false,
+        "directed"_a = true,
+        R"(
+            Simple neighbor sampling without primitives.
+            
+            Args:
+                colptr: Column pointers (CSC format)
+                row: Row indices (CSC format)  
+                input_node: Input nodes to sample from
+                num_neighbors: Number of neighbors per hop
+                replace: Sample with replacement
+                directed: Directed graph
+                
+            Returns:
+                tuple: (samples, rows, cols, edges)
+        )",
+        nb::rv_policy::move  // Add this return value policy
+    );
+  }

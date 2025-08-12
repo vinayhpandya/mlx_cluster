@@ -18,7 +18,7 @@ except ImportError as e:
 project = 'mlx-cluster'
 copyright = '2025, Vinay Pandya'
 author = 'Vinay Pandya'
-release = '0.0.5'
+release = '0.0.6'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
