@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="_static/documentation_options.js?v=adf84aaa"></script>
+    <script src="_static/documentation_options.js?v=9a00c0c0"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
@@ -288,6 +288,7 @@
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mlx_cluster.random_walk"><code class="docutils literal notranslate"><span class="pre">random_walk()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mlx_cluster.rejection_sampling"><code class="docutils literal notranslate"><span class="pre">rejection_sampling()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mlx_cluster.neighbor_sample"><code class="docutils literal notranslate"><span class="pre">neighbor_sample()</span></code></a></li>
 </ul>
             </nav>
         </div>
@@ -346,6 +347,30 @@ breadth-first strategy and depth-first strategy</p></li>
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="mlx_cluster.neighbor_sample">
+<span class="sig-prename descclassname"><span class="pre">mlx_cluster.</span></span><span class="sig-name descname"><span class="pre">neighbor_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">colptr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">mlx.core.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">mlx.core.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">mlx.core.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_neighbors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">collections.abc.Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#mlx_cluster.neighbor_sample" title="Link to this definition">#</a></dt>
+<dd><p>Simple neighbor sampling without primitives.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>colptr</strong> -- Column pointers (CSC format)</p></li>
+<li><p><strong>row</strong> -- Row indices (CSC format)</p></li>
+<li><p><strong>input_node</strong> -- Input nodes to sample from</p></li>
+<li><p><strong>num_neighbors</strong> -- Number of neighbors per hop</p></li>
+<li><p><strong>replace</strong> -- Sample with replacement</p></li>
+<li><p><strong>directed</strong> -- Directed graph</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(samples, rows, cols, edges)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
 
@@ -387,6 +412,7 @@ breadth-first strategy and depth-first strategy</p></li>
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mlx_cluster.random_walk"><code class="docutils literal notranslate"><span class="pre">random_walk()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mlx_cluster.rejection_sampling"><code class="docutils literal notranslate"><span class="pre">rejection_sampling()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mlx_cluster.neighbor_sample"><code class="docutils literal notranslate"><span class="pre">neighbor_sample()</span></code></a></li>
 </ul>
   </nav></div>
 
