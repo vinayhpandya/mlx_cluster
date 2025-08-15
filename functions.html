@@ -48,7 +48,8 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'functions';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Quick Start" href="quickstart.html" />
+    <link rel="next" title="Installation" href="Installation.html" />
+    <link rel="prev" title="MLX-Cluster Documentation" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="Python"/>
   <meta name="docsearch:version" content="" />
@@ -153,19 +154,14 @@
 </button></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
-        
-        <ul class="nav bd-sidenav bd-sidenav__home-link">
-            <li class="toctree-l1">
-                <a class="reference internal" href="index.html">
-                    MLX-Cluster Documentation
-                </a>
-            </li>
-        </ul>
-        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Functions and APIs</span></p>
 <ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">API Reference</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Installation and Quickstart</span></p>
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">API Reference</a></li>
 </ul>
 
     </div>
@@ -402,7 +398,7 @@
 <li><p><strong>col</strong> (<a class="reference external" href="https://ml-explore.github.io/mlx/build/html/python/_autosummary/mlx.core.array.html#mlx.core.array" title="(in MLX v0.28.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">mlx.core.array</span></code></a>) -- edges(col) in csr format.</p></li>
 <li><p><strong>start_indices</strong> (<a class="reference external" href="https://ml-explore.github.io/mlx/build/html/python/_autosummary/mlx.core.array.html#mlx.core.array" title="(in MLX v0.28.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">mlx.core.array</span></code></a>) -- starting nodes of graph from which
 sampling will be performed.</p></li>
-<li><p><strong>random_values</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">mlx.corearray</span></code>) -- random values (between 0 to 1)</p></li>
+<li><p><strong>random_values</strong> (<a class="reference external" href="https://ml-explore.github.io/mlx/build/html/python/_autosummary/mlx.core.array.html#mlx.core.array" title="(in MLX v0.28.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">mlx.core.array</span></code></a>) -- random values (between 0 to 1)</p></li>
 <li><p><strong>walk_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) -- walk length of random graph</p></li>
 </ul>
 </dd>
@@ -431,7 +427,11 @@ breadth-first strategy and depth-first strategy</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>(nodes, edges) tuple of arrays</p>
+<dd class="field-even"><p>Nodes sampled during random walk
+edges (mlx.core.array): Edges sampled during random walk</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nodes (<a class="reference external" href="https://ml-explore.github.io/mlx/build/html/python/_autosummary/mlx.core.array.html#mlx.core.array" title="(in MLX v0.28.0)">mlx.core.array</a>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -474,13 +474,22 @@ breadth-first strategy and depth-first strategy</p></li>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="quickstart.html"
+       href="index.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Quick Start</p>
+        <p class="prev-next-title">MLX-Cluster Documentation</p>
       </div>
+    </a>
+    <a class="right-next"
+       href="Installation.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Installation</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
     </a>
 </div>
                 </footer>

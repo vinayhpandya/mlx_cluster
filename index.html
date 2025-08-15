@@ -48,7 +48,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Installation" href="Installation.html" />
+    <link rel="next" title="API Reference" href="functions.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="Python"/>
   <meta name="docsearch:version" content="" />
@@ -155,19 +155,14 @@
 </button></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
-        
-        <ul class="nav bd-sidenav bd-sidenav__home-link">
-            <li class="toctree-l1 current active">
-                <a class="reference internal" href="#">
-                    MLX-Cluster Documentation
-                </a>
-            </li>
-        </ul>
-        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Functions and APIs</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="functions.html">API Reference</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Installation and Quickstart</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="functions.html">API Reference</a></li>
 </ul>
 
     </div>
@@ -377,7 +372,9 @@
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">MLX-Cluster Documentation</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">MLX-Cluster Documentation</a><ul class="visible nav section-nav flex-column">
+</ul>
+</li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 
@@ -395,23 +392,8 @@
 <h1>MLX-Cluster Documentation<a class="headerlink" href="#mlx-cluster-documentation" title="Link to this heading">#</a></h1>
 <p>Welcome to the mlx-cluster documentation! This library provides high-performance graph algorithms optimized for Apple's MLX framework, including random walks and neighbor sampling.</p>
 <div class="toctree-wrapper compound">
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Functions and APIs</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Installation.html#requirements">Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Installation.html#install-from-pypi">Install from PyPI</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Installation.html#install-from-source">Install from Source</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Installation.html#verify-installation">Verify Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Installation.html#troubleshooting">Troubleshooting</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="quickstart.html#random-walks">Random Walks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="quickstart.html#biased-random-walks-node2vec-style">Biased Random Walks (Node2Vec style)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="quickstart.html#neighbor-sampling">Neighbor Sampling</a></li>
-<li class="toctree-l2"><a class="reference internal" href="quickstart.html#key-features">Key Features</a></li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="functions.html">API Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="functions.html#mlx_cluster.random_walk"><code class="docutils literal notranslate"><span class="pre">random_walk()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="functions.html#mlx_cluster.rejection_sampling"><code class="docutils literal notranslate"><span class="pre">rejection_sampling()</span></code></a></li>
@@ -420,12 +402,13 @@
 </li>
 </ul>
 </div>
+<div class="toctree-wrapper compound">
+</div>
 </section>
 <section id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading">#</a></h1>
 <ul class="simple">
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
-<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
 <li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
 </section>
@@ -442,11 +425,11 @@
                   
 <div class="prev-next-area">
     <a class="right-next"
-       href="Installation.html"
+       href="functions.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Installation</p>
+        <p class="prev-next-title">API Reference</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -467,7 +450,9 @@
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">MLX-Cluster Documentation</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">MLX-Cluster Documentation</a><ul class="visible nav section-nav flex-column">
+</ul>
+</li>
 <li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 

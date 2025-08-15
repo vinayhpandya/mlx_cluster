@@ -5,15 +5,20 @@ Welcome to the mlx-cluster documentation! This library provides high-performance
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Functions and APIs
+   
+   functions
 
+.. toctree::
+   :maxdepth: 3
+   :caption: Installation and Quickstart
+   :hidden:
+   
    Installation
    quickstart
-   functions
 
 Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
