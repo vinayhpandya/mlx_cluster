@@ -443,12 +443,12 @@ edges (mlx.core.array): Edges sampled during random walk</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>colptr</strong> -- Column pointers (CSC format)</p></li>
-<li><p><strong>row</strong> -- Row indices (CSC format)</p></li>
-<li><p><strong>input_node</strong> -- Input nodes to sample from</p></li>
-<li><p><strong>num_neighbors</strong> -- Number of neighbors per hop</p></li>
-<li><p><strong>replace</strong> -- Sample with replacement</p></li>
-<li><p><strong>directed</strong> -- Directed graph</p></li>
+<li><p><strong>colptr</strong> (<a class="reference external" href="https://ml-explore.github.io/mlx/build/html/python/_autosummary/mlx.core.array.html#mlx.core.array" title="(in MLX v0.28.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">mlx.core.array</span></code></a>) -- Column pointers (CSC format)</p></li>
+<li><p><strong>row</strong> (<a class="reference external" href="https://ml-explore.github.io/mlx/build/html/python/_autosummary/mlx.core.array.html#mlx.core.array" title="(in MLX v0.28.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">mlx.core.array</span></code></a>) -- Row indices (CSC format)</p></li>
+<li><p><strong>input_node</strong> (<a class="reference external" href="https://ml-explore.github.io/mlx/build/html/python/_autosummary/mlx.core.array.html#mlx.core.array" title="(in MLX v0.28.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">mlx.core.array</span></code></a>) -- Input nodes to sample from</p></li>
+<li><p><strong>num_neighbors</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[int]</span></code>) -- Number of neighbors per hop</p></li>
+<li><p><strong>(</strong><strong>bool</strong> (<em>directed</em>) -- False): Sample with replacement</p></li>
+<li><p><strong>(</strong><strong>bool</strong> -- False): Directed graph</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
