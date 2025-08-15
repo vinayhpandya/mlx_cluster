@@ -38,11 +38,11 @@ NB_MODULE(_ext, m){
             col (mlx.core.array): edges(col) in csr format.
             start_indices (mlx.core.array): starting nodes of graph from which 
                             sampling will be performed.
-            random_values (mlx.corearray): random values (between 0 to 1)
+            random_values (mlx.core.array): random values (between 0 to 1)
             walk_length (int) : walk length of random graph
 
           Returns:
-              (nodes, edges) tuple of arrays
+              tuple (mlx.core.array, mlx.core.array)
       )",
       nb::rv_policy::move);
 
@@ -84,7 +84,7 @@ NB_MODULE(_ext, m){
                 breadth-first strategy and depth-first strategy
 
         Returns:
-            (nodes, edges) tuple of arrays
+            tuple (mlx.core.array, mlx.core.array)
       )",
       nb::rv_policy::move);
 
@@ -118,15 +118,15 @@ NB_MODULE(_ext, m){
             Simple neighbor sampling without primitives.
             
             Args:
-                colptr: Column pointers (CSC format)
-                row: Row indices (CSC format)  
-                input_node: Input nodes to sample from
-                num_neighbors: Number of neighbors per hop
-                replace: Sample with replacement
-                directed: Directed graph
+                colptr (mlx.core.array): Column pointers (CSC format)
+                row (mlx.core.array): Row indices (CSC format)  
+                input_node (mlx.core.array): Input nodes to sample from
+                num_neighbors (list[int]): Number of neighbors per hop
+                replace (bool:False): Sample with replacement
+                directed (bool:False): Directed graph
                 
             Returns:
-                tuple: (samples, rows, cols, edges)
+                tuple (mlx.core.array, mlx.core.array, mlx.core.array, mlx.core.array): (samples, rows, cols, edges)
         )",
         nb::rv_policy::move  // Add this return value policy
     );

@@ -1,15 +1,16 @@
+============
 Installation
 ============
 
 Requirements
-------------
+============
 
 * Python 3.8 or later
 * macOS with Apple Silicon (M1/M2/M3) or Intel Mac
 * MLX framework
 
 Install from PyPI
------------------
+=================
 
 The easiest way to install mlx-cluster is using pip:
 
@@ -18,7 +19,7 @@ The easiest way to install mlx-cluster is using pip:
    pip install mlx-cluster
 
 Install from Source
--------------------
+===================
 
 To install the latest development version:
 You need to install X-code to enable metal code to run on gpu.
@@ -30,7 +31,7 @@ You need to install X-code to enable metal code to run on gpu.
    pip install -e .
 
 Verify Installation
--------------------
+===================
 
 To verify that mlx-cluster is installed correctly:
 
@@ -42,9 +43,10 @@ To verify that mlx-cluster is installed correctly:
 If you see the version number, the installation was successful!
 
 Troubleshooting
----------------
+===============
 
-**ImportError: No module named 'mlx'**
+ImportError: No module named 'mlx'
+-----------------------------------
 
 Make sure you have MLX installed:
 
@@ -52,6 +54,7 @@ Make sure you have MLX installed:
 
    pip install mlx
 
-**Performance Issues**
+Performance Issues
+------------------
 
 For optimal performance, ensure you're running on Apple Silicon hardware with sufficient memory.
