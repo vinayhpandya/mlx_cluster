@@ -48,8 +48,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'functions';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Installation" href="Installation.html" />
-    <link rel="prev" title="MLX-Cluster Documentation" href="index.html" />
+    <link rel="prev" title="Quick Start" href="quickstart.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="Python"/>
   <meta name="docsearch:version" content="" />
@@ -154,14 +153,14 @@
 </button></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
-        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Functions and APIs</span></p>
-<ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">API Reference</a></li>
-</ul>
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Installation and Quickstart</span></p>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Installation and Quickstart</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Functions and APIs</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">API Reference</a></li>
 </ul>
 
     </div>
@@ -421,8 +420,8 @@ on probablity p and q</p>
 <li><p><strong>start</strong> (<a class="reference external" href="https://ml-explore.github.io/mlx/build/html/python/_autosummary/mlx.core.array.html#mlx.core.array" title="(in MLX v0.28.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">mlx.core.array</span></code></a>) -- starting node of graph from which
 biased sampling will be performed.</p></li>
 <li><p><strong>walk_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) -- walk length of random graph</p></li>
-<li><p><strong>p</strong> -- Likelihood of immediately revisiting a node in the walk.</p></li>
-<li><p><strong>q</strong> -- Control parameter to interpolate between
+<li><p><strong>p</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) -- Likelihood of immediately revisiting a node in the walk.</p></li>
+<li><p><strong>q</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) -- Control parameter to interpolate between
 breadth-first strategy and depth-first strategy</p></li>
 </ul>
 </dd>
@@ -442,9 +441,9 @@ breadth-first strategy and depth-first strategy</p></li>
 <li><p><strong>colptr</strong> (<a class="reference external" href="https://ml-explore.github.io/mlx/build/html/python/_autosummary/mlx.core.array.html#mlx.core.array" title="(in MLX v0.28.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">mlx.core.array</span></code></a>) -- Column pointers (CSC format)</p></li>
 <li><p><strong>row</strong> (<a class="reference external" href="https://ml-explore.github.io/mlx/build/html/python/_autosummary/mlx.core.array.html#mlx.core.array" title="(in MLX v0.28.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">mlx.core.array</span></code></a>) -- Row indices (CSC format)</p></li>
 <li><p><strong>input_node</strong> (<a class="reference external" href="https://ml-explore.github.io/mlx/build/html/python/_autosummary/mlx.core.array.html#mlx.core.array" title="(in MLX v0.28.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">mlx.core.array</span></code></a>) -- Input nodes to sample from</p></li>
-<li><p><strong>num_neighbors</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[int]</span></code>) -- Number of neighbors per hop</p></li>
-<li><p><strong>(</strong><strong>bool</strong> (<em>directed</em>) -- False): Sample with replacement</p></li>
-<li><p><strong>(</strong><strong>bool</strong> -- False): Directed graph</p></li>
+<li><p><strong>num_neighbors</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[int]</span></code>) -- List containing how many neighbors to sample in each hop</p></li>
+<li><p><strong>replace</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) -- Sample with replacement (Default to False)</p></li>
+<li><p><strong>directed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) -- Directed graph (Default to True)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -470,22 +469,13 @@ breadth-first strategy and depth-first strategy</p></li>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="index.html"
+       href="quickstart.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">MLX-Cluster Documentation</p>
+        <p class="prev-next-title">Quick Start</p>
       </div>
-    </a>
-    <a class="right-next"
-       href="Installation.html"
-       title="next page">
-      <div class="prev-next-info">
-        <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Installation</p>
-      </div>
-      <i class="fa-solid fa-angle-right"></i>
     </a>
 </div>
                 </footer>
