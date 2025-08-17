@@ -3,8 +3,6 @@ name: Release Python Package
 on:
   release:
     types: [published]
-  push:
-    branches: ["main"]
 
 jobs:
   build:
@@ -20,7 +18,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: ${{matrix.python-version}}
+          python-version: "3.12"
       - name: Install pypa/build
         run: >-
           python3 -m
@@ -43,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: release
-      url: https://test.pypi.org/project/mlx-cluster
+      url: https://pypi.org/p/mlx-cluster
     permissions:
       id-token: write
     strategy:
@@ -58,6 +56,3 @@ jobs:
           path: dist/
       - name: Publish distribution 📦 to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
-          verbose: true
