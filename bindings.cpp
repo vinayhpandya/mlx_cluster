@@ -79,8 +79,8 @@ NB_MODULE(_ext, m){
             start (mlx.core.array): starting node of graph from which 
                             biased sampling will be performed.
             walk_length (int) : walk length of random graph
-            p : Likelihood of immediately revisiting a node in the walk.
-            q : Control parameter to interpolate between
+            p (float): Likelihood of immediately revisiting a node in the walk.
+            q (float): Control parameter to interpolate between
                 breadth-first strategy and depth-first strategy
 
         Returns:
@@ -121,9 +121,9 @@ NB_MODULE(_ext, m){
                 colptr (mlx.core.array): Column pointers (CSC format)
                 row (mlx.core.array): Row indices (CSC format)  
                 input_node (mlx.core.array): Input nodes to sample from
-                num_neighbors (list[int]): Number of neighbors per hop
-                replace (bool:False): Sample with replacement
-                directed (bool:False): Directed graph
+                num_neighbors (list[int]): List containing how many neighbors to sample in each hop
+                replace (bool): Sample with replacement (Default to False)
+                directed (bool): Directed graph (Default to True)
                 
             Returns:
                 tuple (mlx.core.array, mlx.core.array, mlx.core.array, mlx.core.array): (samples, rows, cols, edges)
