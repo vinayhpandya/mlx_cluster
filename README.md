@@ -8,16 +8,16 @@ High-performance graph algorithms optimized for Apple's MLX framework, featuring
 
 **[Documentation](https://vinayhpandya.github.io/mlx_cluster/)** | **[Quickstart](https://vinayhpandya.github.io/mlx_cluster/quickstart.html)** |
 
-## 🚀 Features
+## Features
 
-- **🔥 MLX Optimized**: Built specifically for Apple's MLX framework with GPU acceleration
-- **⚡ High Performance**: Optimized C++ implementations with Metal shaders for Apple Silicon
-- **🎯 Graph Algorithms**: 
+- ** MLX Optimized**: Built specifically for Apple's MLX framework with GPU acceleration
+- ** High Performance**: Optimized C++ implementations with Metal shaders for Apple Silicon
+- ** Graph Algorithms**: 
   - Uniform random walks
   - Biased random walks (Node2Vec style with p/q parameters)
   - Multi-hop neighbor sampling (GraphSAGE style)
 
-## 📦 Installation
+## Installation
 
 ### From PyPI (Recommended)
 
@@ -53,7 +53,7 @@ Optional (for examples and testing):
 - PyTorch (for dataset utilities)
 - pytest
 
-## 🔧 Quick Start
+## Quick Start
 
 ### Random Walks
 
@@ -137,12 +137,12 @@ samples, rows, cols, edges = neighbor_sample(
 print(f"Sampled {len(samples)} nodes and {len(edges)} edges")
 ```
 
-## 📚 Documentation
+## Documentation
 
 For comprehensive documentation, examples, and API reference, visit:
 [Documentation]()
 
-## 🧪 Testing
+## Testing
 
 Run the test suite:
 
@@ -154,7 +154,7 @@ pip install pytest mlx-graphs torch
 pytest -s -v
 ```
 
-## ⚡ Performance
+## Performance
 
 MLX-Cluster is optimized for Apple Silicon and shows significant speedups:
 
@@ -163,7 +163,7 @@ MLX-Cluster is optimized for Apple Silicon and shows significant speedups:
 - **Memory Efficient**: Optimized sparse graph representations
 - **Batch Processing**: Efficient handling of thousands of concurrent walks
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions!
 1. Fork the repository
@@ -183,7 +183,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [MLX](https://github.com/ml-explore/mlx) for the foundational framework
 - [MLX-Graphs](https://github.com/mlx-graphs/mlx-graphs) for graph utilities and datasets
 
-## 📊 Citation
+##  Citation
 
 If you use MLX-Cluster in your research, please cite:
 
@@ -197,7 +197,7 @@ If you use MLX-Cluster in your research, please cite:
 }
 ```
 
-## 🔗 Related Projects
+## Related Projects
 
 - [MLX](https://github.com/ml-explore/mlx) - Apple's machine learning framework
 - [MLX-Graphs](https://github.com/mlx-graphs/mlx-graphs) - Graph neural networks for MLX
