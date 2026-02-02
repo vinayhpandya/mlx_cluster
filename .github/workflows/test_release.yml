@@ -2,23 +2,23 @@ name: Release Python Package
 
 on:
   release:
-    types: [released]
+    types: [prereleased]
 
 jobs:
   build:
-    name: Build distribution 📦
+    name: Build test distribution 📦
     runs-on: macos-14
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.9", "3.10", "3.11", "3.13"]
 
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python-version }}
       - name: Install pypa/build
         run: >-
           python3 -m
@@ -35,18 +35,18 @@ jobs:
 
   publish-to-pypi:
     name: >-
-      Publish Python 🐍 distribution 📦 to PyPI
+      Publish Python 🐍 distribution 📦 to TestPyPI
     needs:
       - build
     runs-on: ubuntu-latest
     environment:
       name: release
-      url: https://pypi.org/p/mlx-cluster
+      url: https://test.pypi.org/p/mlx-cluster
     permissions:
       id-token: write
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.9", "3.10", "3.11", "3.13"]
 
     steps:
       - name: Download all the dists
@@ -54,5 +54,7 @@ jobs:
         with:
           name: wheels-macOS-py${{ matrix.python-version }}
           path: dist/
-      - name: Publish distribution 📦 to PyPI
+      - name: Publish distribution 📦 to  TestPyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        with: 
+            repository-url: https://test.pypi.org/legacy/
