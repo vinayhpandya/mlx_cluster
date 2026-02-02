@@ -1,6 +1,6 @@
 [project]
 name = "mlx_cluster"
-version = "0.0.6"
+version = "0.0.9"
 authors = [
   { name = "Vinay Pandya", email = "vinayharshadpandya27@gmail.com" },
 ]
@@ -51,7 +51,7 @@ markers = [
 
 [build-system]
 requires = [
-  "nanobind==2.4.0",
+  "nanobind==2.10.2",
   "setuptools>=42",
   "cmake>=3.24",
   "mlx>=0.26.0", 
