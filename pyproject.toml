@@ -1,6 +1,6 @@
 [project]
 name = "mlx_cluster"
-version = "0.0.9"
+version = "0.0.7"
 authors = [
   { name = "Vinay Pandya", email = "vinayharshadpandya27@gmail.com" },
 ]
