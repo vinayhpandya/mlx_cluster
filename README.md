@@ -10,9 +10,9 @@ High-performance graph algorithms optimized for Apple's MLX framework, featuring
 
 ## Features
 
-- ** MLX Optimized**: Built specifically for Apple's MLX framework with GPU acceleration
-- ** High Performance**: Optimized C++ implementations with Metal shaders for Apple Silicon
-- ** Graph Algorithms**: 
+- MLX Optimized: Built specifically for Apple's MLX framework with GPU acceleration
+- High Performance: Optimized C++ implementations with Metal shaders for Apple Silicon
+- Graph Algorithms: 
   - Uniform random walks
   - Biased random walks (Node2Vec style with p/q parameters)
   - Multi-hop neighbor sampling (GraphSAGE style)
