@@ -17,7 +17,7 @@ except ImportError as e:
 project = 'mlx-cluster'
 copyright = '2025, Vinay Pandya'
 author = 'Vinay Pandya'
-release = '0.0.8'
+release = '0.1.0'
 
 # -- General configuration ---------------------------------------------------
 extensions = [
