@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -23,7 +23,7 @@ jobs:
           build
           --user
       - name: Build a binary wheel and a source tarball
-        run: python3 -m pip install nanobind==2.10.2 && python3 -m build
+        run: python3 -m build
       - name: Store the distribution packages
         uses: actions/upload-artifact@v4
         with:

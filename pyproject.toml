@@ -1,12 +1,13 @@
 [project]
 name = "mlx_cluster"
-version = "0.0.7"
+version = "0.1.0"
 authors = [
   { name = "Vinay Pandya", email = "vinayharshadpandya27@gmail.com" },
 ]
 description = "C++ extension for generating random graphs"
 readme = "README.md"
 requires-python = ">=3.10"
+dependencies = ["mlx>=0.32.0"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Programming Language :: Python :: 3",
@@ -51,9 +52,9 @@ markers = [
 
 [build-system]
 requires = [
-  "nanobind==2.10.2",
+  "nanobind==3.1.0",
   "setuptools>=42",
   "cmake>=3.24",
-  "mlx>=0.26.0", 
+  "mlx>=0.32.0", 
 ]
 build-backend = "setuptools.build_meta"

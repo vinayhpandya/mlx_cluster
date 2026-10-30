@@ -4,6 +4,10 @@
 #include <random_walks/BiasedRandomWalk.h>
 #include <nanobind/stl/vector.h>
 #include <random_walks/NeighborSample.h>
+#include <sampling/HeteroNeighborSample.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/tuple.h>
+#include <nanobind/stl/unordered_map.h>
 namespace nb = nanobind;
 using namespace nb::literals;
 using namespace mlx::core;
@@ -130,4 +134,55 @@ NB_MODULE(_ext, m){
         )",
         nb::rv_policy::move  // Add this return value policy
     );
-  }
+  
+    m.def(
+        "hetero_neighbor_sample",
+        [](const std::vector<std::string>& node_types,
+           const std::vector<mlx_cluster::EdgeType>& edge_types,
+           const std::unordered_map<std::string, mx::array>& colptr_dict,
+           const std::unordered_map<std::string, mx::array>& row_dict,
+           const std::unordered_map<std::string, mx::array>& seed_dict,
+           const std::unordered_map<std::string, std::vector<int64_t>>& num_neighbors_dict,
+           const std::unordered_map<std::string, int64_t>& num_nodes_dict,
+           bool replace,
+           bool directed,
+           uint64_t seed) {
+            mlx_cluster::HeteroSampleOutput out;
+            {
+                // Sampling is pure C++; let other Python threads (e.g. a
+                // training loop) run meanwhile.
+                nb::gil_scoped_release release;
+                out = mlx_cluster::hetero_neighbor_sample(
+                    node_types, edge_types, colptr_dict, row_dict, seed_dict,
+                    num_neighbors_dict, num_nodes_dict, replace, directed, seed);
+            }
+            return nb::make_tuple(
+                std::move(out.node_id),
+                std::move(out.row),
+                std::move(out.col),
+                std::move(out.edge_id),
+                std::move(out.num_sampled_nodes),
+                std::move(out.num_sampled_edges));
+        },
+        "node_types"_a,
+        "edge_types"_a,
+        "colptr_dict"_a,
+        "row_dict"_a,
+        "seed_dict"_a,
+        "num_neighbors_dict"_a,
+        "num_nodes_dict"_a,
+        "replace"_a,
+        "directed"_a,
+        "seed"_a,
+        R"(
+            Low-level heterogeneous neighbor sampling. Prefer
+            :func:`mlx_cluster.hetero_neighbor_sample`, which accepts
+            ``(src, rel, dst)`` tuple keys and fills in defaults.
+
+            Edge types are keyed by ``"src__rel__dst"`` strings here.
+
+            Returns:
+                tuple of dicts: (node_id, row, col, edge_id,
+                num_sampled_nodes, num_sampled_edges)
+        )");
+}

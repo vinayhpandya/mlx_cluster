@@ -36,6 +36,8 @@ PUBLIC
 ${CMAKE_CURRENT_LIST_DIR}/random_walks/RandomWalk.cpp
 ${CMAKE_CURRENT_LIST_DIR}/random_walks/BiasedRandomWalk.cpp
 ${CMAKE_CURRENT_LIST_DIR}/random_walks/NeighborSample.cpp
+${CMAKE_CURRENT_LIST_DIR}/random_walks/NeighborSample.cpp
+${CMAKE_CURRENT_LIST_DIR}/sampling/HeteroNeighborSample.cpp 
 )
 
 target_include_directories(mlx_cluster
