@@ -98,7 +98,7 @@ void RandomWalk::eval_gpu(
         auto lib = d.get_library("mlx_cluster", current_binary_dir());
         auto kernel = d.get_kernel("random_walk", lib);
 
-        auto& compute_encoder = d.get_command_encoder(s.index);
+        auto& compute_encoder = mx::metal::get_command_encoder(s);
         compute_encoder.set_compute_pipeline_state(kernel);
 
         compute_encoder.set_input_array(rowptr, 0);
@@ -107,7 +107,7 @@ void RandomWalk::eval_gpu(
         compute_encoder.set_input_array(rand, 3);
         compute_encoder.set_output_array(outputs[0], 4);
         compute_encoder.set_output_array(outputs[1], 5);
-        compute_encoder.set_bytes(&walk_length_, sizeof(walk_length_), 6);
+        compute_encoder.set_bytes(walk_length_, 6);
 
         MTL::Size grid_size = MTL::Size(numel, 1, 1);
         MTL::Size thread_group_size = MTL::Size(kernel->maxTotalThreadsPerThreadgroup(), 1, 1);

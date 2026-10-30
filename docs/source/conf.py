@@ -17,7 +17,7 @@ except ImportError as e:
 project = 'mlx-cluster'
 copyright = '2025, Vinay Pandya'
 author = 'Vinay Pandya'
-release = '0.0.6'
+release = '0.0.8'
 
 # -- General configuration ---------------------------------------------------
 extensions = [
@@ -47,6 +47,7 @@ napoleon_attr_annotations = True
 typehints_use_signature = True
 typehints_use_signature_return = True
 autosummary_generate = True
+autodoc_class_signature = "separated"
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
