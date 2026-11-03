@@ -4,7 +4,7 @@ High-performance graph algorithms optimized for Apple's MLX framework, featuring
 
 [![PyPI version](https://img.shields.io/pypi/v/mlx-cluster)](https://pypi.org/project/mlx-cluster/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 
 **[Documentation](https://vinayhpandya.github.io/mlx_cluster/)** | **[Quickstart](https://vinayhpandya.github.io/mlx_cluster/quickstart.html)** |
 
@@ -44,7 +44,7 @@ pip install -e . --verbose
 ### Dependencies
 
 Required:
-- Python 3.8+
+- Python 3.10+
 - MLX framework
 - NumPy
 
