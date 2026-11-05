@@ -5,6 +5,8 @@
 #include <nanobind/stl/vector.h>
 #include <random_walks/NeighborSample.h>
 #include <sampling/HeteroNeighborSample.h>
+#include <sparse/SpMM.h>
+#include <nanobind/stl/optional.h>
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/tuple.h>
 #include <nanobind/stl/unordered_map.h>
@@ -184,5 +186,84 @@ NB_MODULE(_ext, m){
             Returns:
                 tuple of dicts: (node_id, row, col, edge_id,
                 num_sampled_nodes, num_sampled_edges)
+        )");
+
+    m.def(
+        "_spmm_coo",
+        [](const mx::array& row,
+           const mx::array& col,
+           const mx::array& x,
+           int num_rows,
+           std::optional<mx::array> values,
+           nb::object stream) {
+          return mlx_sparse::spmm_coo(
+              row, col, x, values, num_rows,
+              stream.is_none() ? mx::StreamOrDevice{}
+                               : nb::cast<mx::StreamOrDevice>(stream));
+        },
+        "row"_a, "col"_a, "x"_a, "num_rows"_a, "values"_a = nb::none(),
+        nb::kw_only(), "stream"_a = nb::none(),
+        R"(
+            Low-level COO SpMM (sum). Prefer :func:`mlx_cluster.spmm_coo`.
+
+            ``out[row[e]] += values[e] * x[col[e]]``
+        )");
+
+    m.def(
+        "_spmm_csr",
+        [](const mx::array& rowptr,
+           const mx::array& col,
+           const mx::array& x,
+           std::optional<mx::array> values,
+           std::optional<mx::array> long_rows,
+           std::optional<mx::array> chunk_ptr,
+           std::optional<mx::array> chunk_start,
+           std::optional<mx::array> chunk_end,
+           int long_row_threshold,
+           nb::object stream) {
+          std::optional<mlx_sparse::LongRows> lng;
+          if (long_rows) {
+            if (!chunk_ptr || !chunk_start || !chunk_end) {
+              throw std::invalid_argument(
+                  "[spmm] long_rows needs chunk_ptr, chunk_start and chunk_end.");
+            }
+            lng = mlx_sparse::LongRows{
+                *long_rows, *chunk_ptr, *chunk_start, *chunk_end,
+                long_row_threshold};
+          }
+          return mlx_sparse::spmm_csr(
+              rowptr, col, x, values, lng,
+              stream.is_none() ? mx::StreamOrDevice{}
+                               : nb::cast<mx::StreamOrDevice>(stream));
+        },
+        "rowptr"_a, "col"_a, "x"_a, "values"_a = nb::none(),
+        nb::kw_only(),
+        "long_rows"_a = nb::none(), "chunk_ptr"_a = nb::none(),
+        "chunk_start"_a = nb::none(), "chunk_end"_a = nb::none(),
+        "long_row_threshold"_a = 0,
+        "stream"_a = nb::none(),
+        R"(
+            Low-level CSR SpMM (sum). Prefer :func:`mlx_cluster.spmm_csr`.
+        )");
+
+    m.def(
+        "sddmm",
+        [](const mx::array& row,
+           const mx::array& col,
+           const mx::array& a,
+           const mx::array& b,
+           nb::object stream) {
+          return mlx_sparse::sddmm(
+              row, col, a, b,
+              stream.is_none() ? mx::StreamOrDevice{}
+                               : nb::cast<mx::StreamOrDevice>(stream));
+        },
+        "row"_a, "col"_a, "a"_a, "b"_a,
+        nb::kw_only(), "stream"_a = nb::none(),
+        R"(
+            Per-edge dot product: ``out[e] = <a[row[e]], b[col[e]]>``.
+
+            Returns:
+                mlx.core.array: float32 array of shape ``[num_edges]``.
         )");
 }
