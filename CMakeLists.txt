@@ -37,7 +37,8 @@ ${CMAKE_CURRENT_LIST_DIR}/random_walks/RandomWalk.cpp
 ${CMAKE_CURRENT_LIST_DIR}/random_walks/BiasedRandomWalk.cpp
 ${CMAKE_CURRENT_LIST_DIR}/random_walks/NeighborSample.cpp
 ${CMAKE_CURRENT_LIST_DIR}/random_walks/NeighborSample.cpp
-${CMAKE_CURRENT_LIST_DIR}/sampling/HeteroNeighborSample.cpp 
+${CMAKE_CURRENT_LIST_DIR}/sampling/HeteroNeighborSample.cpp
+${CMAKE_CURRENT_LIST_DIR}/sparse/SpMM.cpp
 )
 
 target_include_directories(mlx_cluster
@@ -52,6 +53,7 @@ if(MLX_BUILD_METAL)
     TARGET mlx_cluster_metallib
     TITLE mlx_cluster
     SOURCES ${CMAKE_CURRENT_LIST_DIR}/random_walks/random_walk.metal
+            ${CMAKE_CURRENT_LIST_DIR}/sparse/spmm.metal
     INCLUDE_DIRS ${PROJECT_SOURCE_DIR} ${MLX_INCLUDE_DIRS}
     OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
   )

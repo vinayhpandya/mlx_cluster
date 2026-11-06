@@ -5,12 +5,30 @@
 #include <nanobind/stl/vector.h>
 #include <random_walks/NeighborSample.h>
 #include <sampling/HeteroNeighborSample.h>
+#include <sparse/SpMM.h>
+#include <nanobind/stl/optional.h>
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/tuple.h>
 #include <nanobind/stl/unordered_map.h>
 namespace nb = nanobind;
 using namespace nb::literals;
 using namespace mlx::core;
+
+namespace {
+mlx_sparse::SpMMReduce parse_reduce(const std::string& r) {
+  if (r == "sum") {
+    return mlx_sparse::SpMMReduce::Sum;
+  }
+  if (r == "max") {
+    return mlx_sparse::SpMMReduce::Max;
+  }
+  if (r == "min") {
+    return mlx_sparse::SpMMReduce::Min;
+  }
+  throw std::invalid_argument(
+      "[spmm] reduce must be 'sum', 'max' or 'min', got '" + r + "'.");
+}
+} // namespace
 
 NB_MODULE(_ext, m){
 
@@ -184,5 +202,113 @@ NB_MODULE(_ext, m){
             Returns:
                 tuple of dicts: (node_id, row, col, edge_id,
                 num_sampled_nodes, num_sampled_edges)
+        )");
+
+    m.def(
+        "_spmm_coo",
+        [](const mx::array& row,
+           const mx::array& col,
+           const mx::array& x,
+           int num_rows,
+           std::optional<mx::array> values,
+           const std::string& reduce,
+           nb::object stream) {
+          return mlx_sparse::spmm_coo(
+              row, col, x, values, num_rows, parse_reduce(reduce),
+              stream.is_none() ? mx::StreamOrDevice{}
+                               : nb::cast<mx::StreamOrDevice>(stream));
+        },
+        "row"_a, "col"_a, "x"_a, "num_rows"_a, "values"_a = nb::none(),
+        nb::kw_only(), "reduce"_a = "sum", "stream"_a = nb::none(),
+        R"(
+            Low-level COO SpMM. Prefer :func:`mlx_cluster.spmm_coo`.
+
+            ``out[row[e]] += values[e] * x[col[e]]``
+        )");
+
+    m.def(
+        "_spmm_csr",
+        [](const mx::array& rowptr,
+           const mx::array& col,
+           const mx::array& x,
+           std::optional<mx::array> values,
+           std::optional<mx::array> long_rows,
+           std::optional<mx::array> chunk_ptr,
+           std::optional<mx::array> chunk_start,
+           std::optional<mx::array> chunk_end,
+           int long_row_threshold,
+           std::optional<mx::array> t_rowptr,
+           std::optional<mx::array> t_col,
+           std::optional<mx::array> t_perm,
+           std::optional<mx::array> t_long_rows,
+           std::optional<mx::array> t_chunk_ptr,
+           std::optional<mx::array> t_chunk_start,
+           std::optional<mx::array> t_chunk_end,
+           int t_long_row_threshold,
+           const std::string& reduce,
+           nb::object stream) {
+          auto make_long = [](auto& rows, auto& ptr, auto& start, auto& end,
+                              int threshold)
+              -> std::optional<mlx_sparse::LongRows> {
+            if (!rows) {
+              return std::nullopt;
+            }
+            if (!ptr || !start || !end) {
+              throw std::invalid_argument(
+                  "[spmm] long_rows needs chunk_ptr, chunk_start and chunk_end.");
+            }
+            return mlx_sparse::LongRows{*rows, *ptr, *start, *end, threshold};
+          };
+          auto lng = make_long(
+              long_rows, chunk_ptr, chunk_start, chunk_end, long_row_threshold);
+          std::optional<mlx_sparse::CSRTranspose> tr;
+          if (t_rowptr) {
+            if (!t_col || !t_perm) {
+              throw std::invalid_argument(
+                  "[spmm] t_rowptr needs t_col and t_perm.");
+            }
+            tr = mlx_sparse::CSRTranspose{
+                *t_rowptr, *t_col, *t_perm,
+                make_long(t_long_rows, t_chunk_ptr, t_chunk_start, t_chunk_end,
+                          t_long_row_threshold)};
+          }
+          return mlx_sparse::spmm_csr(
+              rowptr, col, x, values, lng, tr, parse_reduce(reduce),
+              stream.is_none() ? mx::StreamOrDevice{}
+                               : nb::cast<mx::StreamOrDevice>(stream));
+        },
+        "rowptr"_a, "col"_a, "x"_a, "values"_a = nb::none(),
+        nb::kw_only(),
+        "long_rows"_a = nb::none(), "chunk_ptr"_a = nb::none(),
+        "chunk_start"_a = nb::none(), "chunk_end"_a = nb::none(),
+        "long_row_threshold"_a = 0,
+        "t_rowptr"_a = nb::none(), "t_col"_a = nb::none(),
+        "t_perm"_a = nb::none(), "t_long_rows"_a = nb::none(),
+        "t_chunk_ptr"_a = nb::none(), "t_chunk_start"_a = nb::none(),
+        "t_chunk_end"_a = nb::none(), "t_long_row_threshold"_a = 0,
+        "reduce"_a = "sum", "stream"_a = nb::none(),
+        R"(
+            Low-level CSR SpMM. Prefer :func:`mlx_cluster.spmm_csr`.
+        )");
+
+    m.def(
+        "sddmm",
+        [](const mx::array& row,
+           const mx::array& col,
+           const mx::array& a,
+           const mx::array& b,
+           nb::object stream) {
+          return mlx_sparse::sddmm(
+              row, col, a, b,
+              stream.is_none() ? mx::StreamOrDevice{}
+                               : nb::cast<mx::StreamOrDevice>(stream));
+        },
+        "row"_a, "col"_a, "a"_a, "b"_a,
+        nb::kw_only(), "stream"_a = nb::none(),
+        R"(
+            Per-edge dot product: ``out[e] = <a[row[e]], b[col[e]]>``.
+
+            Returns:
+                mlx.core.array: float32 array of shape ``[num_edges]``.
         )");
 }

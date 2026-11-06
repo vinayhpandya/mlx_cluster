@@ -1,6 +1,6 @@
 # MLX-Cluster
 
-High-performance graph algorithms optimized for Apple's MLX framework, featuring random walks, biased random walks, and neighbor sampling.
+High-performance graph algorithms optimized for Apple's MLX framework, featuring random walks, biased random walks, neighbor sampling, and fused sparse × dense matrix multiplication (SpMM) for GNN message passing.
 
 [![PyPI version](https://img.shields.io/pypi/v/mlx-cluster)](https://pypi.org/project/mlx-cluster/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -16,6 +16,7 @@ High-performance graph algorithms optimized for Apple's MLX framework, featuring
   - Uniform random walks
   - Biased random walks (Node2Vec style with p/q parameters)
   - Multi-hop neighbor sampling (GraphSAGE style)
+  - Sparse × dense matrix multiplication (SpMM) for message passing: `sum`, `mean`, `max`, `min`, with gradients (COO and CSR, Metal kernels)
 
 ## Installation
 
@@ -136,6 +137,37 @@ samples, rows, cols, edges = neighbor_sample(
 
 print(f"Sampled {len(samples)} nodes and {len(edges)} edges")
 ```
+
+### Sparse Matrix Multiplication (message passing)
+
+Aggregates neighbour features as `A @ X` without materialising a
+`[num_edges, features]` message array, in both the forward and backward pass.
+
+```python
+import mlx.core as mx
+from mlx_cluster import coo_to_csr, spmm_coo, spmm_csr
+
+edge_index = mx.array([[0, 1, 2, 2], [1, 2, 0, 1]])   # [src, dst]
+src, dst = edge_index[0], edge_index[1]
+x = mx.random.normal((3, 64))
+
+# COO: works on the edge list directly
+out = spmm_coo(dst, src, x, reduce="sum")             # also "mean", "max", "min"
+
+# CSR: sort once per graph and reuse; deterministic and fastest on larger graphs
+csr = coo_to_csr(dst, src, num_rows=3)
+out = spmm_csr(csr.rowptr, csr.col, x, reduce="mean",
+               long_rows=csr.long_rows, transpose=csr.transpose)
+
+grad = mx.grad(lambda x: spmm_csr(csr.rowptr, csr.col, x,
+                                  transpose=csr.transpose).sum())(x)
+```
+
+On an Apple M4 Pro, a GCN training step on a 1M-edge graph (256 features) is
+about 4x faster and uses about 4.6x less memory than gather-scatter. mlx-graphs
+uses these kernels automatically via `@fused_message_passing`. See the
+[SpMM guide](https://vinayhpandya.github.io/mlx_cluster/sparse.html) for
+conventions (empty rows, ties) and details.
 
 ## Documentation
 

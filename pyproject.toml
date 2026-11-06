@@ -19,7 +19,7 @@ classifiers = [
 [project.optional-dependencies]
 dev = []
 docs = [
-  "mlx>=0.27.1",
+  "mlx<=0.32",
   "mlx-graphs>=0.0.8",
   "ipython==8.21.0",
   "sphinx>=7.2.6",
@@ -32,7 +32,7 @@ docs = [
 test = [
   "mlx-graphs>=0.0.8",
   "torch>=2.2.0",
-  "mlx>=0.26.0",
+  "mlx<=0.32",
   "pytest==7.4.4",
   "scipy>=1.13.0",
   "requests==2.31.0",
