@@ -14,6 +14,22 @@ namespace nb = nanobind;
 using namespace nb::literals;
 using namespace mlx::core;
 
+namespace {
+mlx_sparse::SpMMReduce parse_reduce(const std::string& r) {
+  if (r == "sum") {
+    return mlx_sparse::SpMMReduce::Sum;
+  }
+  if (r == "max") {
+    return mlx_sparse::SpMMReduce::Max;
+  }
+  if (r == "min") {
+    return mlx_sparse::SpMMReduce::Min;
+  }
+  throw std::invalid_argument(
+      "[spmm] reduce must be 'sum', 'max' or 'min', got '" + r + "'.");
+}
+} // namespace
+
 NB_MODULE(_ext, m){
 
     m.def(
@@ -195,16 +211,17 @@ NB_MODULE(_ext, m){
            const mx::array& x,
            int num_rows,
            std::optional<mx::array> values,
+           const std::string& reduce,
            nb::object stream) {
           return mlx_sparse::spmm_coo(
-              row, col, x, values, num_rows,
+              row, col, x, values, num_rows, parse_reduce(reduce),
               stream.is_none() ? mx::StreamOrDevice{}
                                : nb::cast<mx::StreamOrDevice>(stream));
         },
         "row"_a, "col"_a, "x"_a, "num_rows"_a, "values"_a = nb::none(),
-        nb::kw_only(), "stream"_a = nb::none(),
+        nb::kw_only(), "reduce"_a = "sum", "stream"_a = nb::none(),
         R"(
-            Low-level COO SpMM (sum). Prefer :func:`mlx_cluster.spmm_coo`.
+            Low-level COO SpMM. Prefer :func:`mlx_cluster.spmm_coo`.
 
             ``out[row[e]] += values[e] * x[col[e]]``
         )");
@@ -220,19 +237,43 @@ NB_MODULE(_ext, m){
            std::optional<mx::array> chunk_start,
            std::optional<mx::array> chunk_end,
            int long_row_threshold,
+           std::optional<mx::array> t_rowptr,
+           std::optional<mx::array> t_col,
+           std::optional<mx::array> t_perm,
+           std::optional<mx::array> t_long_rows,
+           std::optional<mx::array> t_chunk_ptr,
+           std::optional<mx::array> t_chunk_start,
+           std::optional<mx::array> t_chunk_end,
+           int t_long_row_threshold,
+           const std::string& reduce,
            nb::object stream) {
-          std::optional<mlx_sparse::LongRows> lng;
-          if (long_rows) {
-            if (!chunk_ptr || !chunk_start || !chunk_end) {
+          auto make_long = [](auto& rows, auto& ptr, auto& start, auto& end,
+                              int threshold)
+              -> std::optional<mlx_sparse::LongRows> {
+            if (!rows) {
+              return std::nullopt;
+            }
+            if (!ptr || !start || !end) {
               throw std::invalid_argument(
                   "[spmm] long_rows needs chunk_ptr, chunk_start and chunk_end.");
             }
-            lng = mlx_sparse::LongRows{
-                *long_rows, *chunk_ptr, *chunk_start, *chunk_end,
-                long_row_threshold};
+            return mlx_sparse::LongRows{*rows, *ptr, *start, *end, threshold};
+          };
+          auto lng = make_long(
+              long_rows, chunk_ptr, chunk_start, chunk_end, long_row_threshold);
+          std::optional<mlx_sparse::CSRTranspose> tr;
+          if (t_rowptr) {
+            if (!t_col || !t_perm) {
+              throw std::invalid_argument(
+                  "[spmm] t_rowptr needs t_col and t_perm.");
+            }
+            tr = mlx_sparse::CSRTranspose{
+                *t_rowptr, *t_col, *t_perm,
+                make_long(t_long_rows, t_chunk_ptr, t_chunk_start, t_chunk_end,
+                          t_long_row_threshold)};
           }
           return mlx_sparse::spmm_csr(
-              rowptr, col, x, values, lng,
+              rowptr, col, x, values, lng, tr, parse_reduce(reduce),
               stream.is_none() ? mx::StreamOrDevice{}
                                : nb::cast<mx::StreamOrDevice>(stream));
         },
@@ -241,9 +282,13 @@ NB_MODULE(_ext, m){
         "long_rows"_a = nb::none(), "chunk_ptr"_a = nb::none(),
         "chunk_start"_a = nb::none(), "chunk_end"_a = nb::none(),
         "long_row_threshold"_a = 0,
-        "stream"_a = nb::none(),
+        "t_rowptr"_a = nb::none(), "t_col"_a = nb::none(),
+        "t_perm"_a = nb::none(), "t_long_rows"_a = nb::none(),
+        "t_chunk_ptr"_a = nb::none(), "t_chunk_start"_a = nb::none(),
+        "t_chunk_end"_a = nb::none(), "t_long_row_threshold"_a = 0,
+        "reduce"_a = "sum", "stream"_a = nb::none(),
         R"(
-            Low-level CSR SpMM (sum). Prefer :func:`mlx_cluster.spmm_csr`.
+            Low-level CSR SpMM. Prefer :func:`mlx_cluster.spmm_csr`.
         )");
 
     m.def(

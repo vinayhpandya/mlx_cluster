@@ -13,6 +13,7 @@ so ``spmm_coo(edge_index[1], edge_index[0], x)`` sums each node's incoming
 neighbour features, i.e. the same as
 ``scatter(x[edge_index[0]], edge_index[1], num_nodes, "add")``.
 
+Reductions: ``"sum"``, ``"mean"``, ``"max"`` and ``"min"`` (per feature).
 Both ops are differentiable w.r.t. ``x`` and ``values``.
 """
 
@@ -23,10 +24,11 @@ import numpy as np
 
 from ._ext import _spmm_coo, _spmm_csr, sddmm
 
-SpMMReduce = Literal["sum", "add", "mean"]
+SpMMReduce = Literal["sum", "add", "mean", "max", "min"]
 
 __all__ = [
     "CSR",
+    "CSRTranspose",
     "LongRows",
     "coo_to_csr",
     "sddmm",
@@ -91,6 +93,27 @@ def build_long_rows(
     )
 
 
+class CSRTranspose(NamedTuple):
+    """The transpose of a :class:`CSR` matrix (edges grouped by source node).
+
+    Used by :func:`spmm_csr` for the backward pass ``A^T @ grad``, so the
+    gradient w.r.t. ``x`` also runs on the deterministic, atomic-free CSR
+    kernel. Built by :func:`coo_to_csr` (``transpose=True``).
+
+    Attributes:
+        rowptr: ``int64 [num_cols + 1]``.
+        col: ``int64 [num_edges]`` destination (original row) of each edge.
+        perm: ``int64 [num_edges]``; transposed edge ``i`` is CSR edge
+            ``perm[i]`` (used to reorder edge values).
+        long_rows: optional :class:`LongRows` for high out-degree nodes.
+    """
+
+    rowptr: mx.array
+    col: mx.array
+    perm: mx.array
+    long_rows: Optional[LongRows] = None
+
+
 class CSR(NamedTuple):
     """A sparse matrix in CSR format.
 
@@ -102,6 +125,7 @@ class CSR(NamedTuple):
         perm: ``[num_edges]`` permutation such that ``col == input_col[perm]``.
             Use it to reorder any other per-edge array into CSR order.
         long_rows: optional :class:`LongRows` metadata for high-degree rows.
+        transpose: optional :class:`CSRTranspose`, used for the backward pass.
     """
 
     rowptr: mx.array
@@ -109,6 +133,7 @@ class CSR(NamedTuple):
     values: Optional[mx.array]
     perm: mx.array
     long_rows: Optional[LongRows] = None
+    transpose: Optional[CSRTranspose] = None
 
     @property
     def num_rows(self) -> int:
@@ -118,9 +143,16 @@ class CSR(NamedTuple):
 def _check_reduce(reduce: str) -> str:
     if reduce in ("sum", "add"):
         return "sum"
-    if reduce == "mean":
-        return "mean"
-    raise ValueError(f"reduce must be 'sum', 'add' or 'mean', got {reduce!r}")
+    if reduce in ("mean", "max", "min"):
+        return reduce
+    raise ValueError(
+        f"reduce must be 'sum', 'add', 'mean', 'max' or 'min', got {reduce!r}"
+    )
+
+
+def _kernel_reduce(reduce: str) -> str:
+    # "mean" is a sum divided by the degree afterwards
+    return "sum" if reduce == "mean" else reduce
 
 
 def coo_to_csr(
@@ -130,6 +162,8 @@ def coo_to_csr(
     values: Optional[mx.array] = None,
     long_row_threshold: Optional[int] = 256,
     chunk_size: int = 2048,
+    transpose: bool = True,
+    num_cols: Optional[int] = None,
 ) -> CSR:
     """Converts a COO edge list into CSR (sorted by ``row``).
 
@@ -141,6 +175,12 @@ def coo_to_csr(
             :class:`LongRows`). ``None`` disables it and keeps the conversion
             fully lazy (no host read-back), e.g. inside ``mx.compile``.
         chunk_size: maximum number of edges per long-row chunk.
+        transpose: also build the transposed CSR (one more sort, ~3 extra
+            index arrays) so the backward pass of :func:`spmm_csr` uses the
+            CSR kernel: deterministic and atomic-free. Set ``False`` to save
+            the memory when you only need the forward pass.
+        num_cols: number of columns (source nodes), i.e. ``x.shape[0]`` in
+            :func:`spmm_csr`. Defaults to ``num_rows`` (square adjacency).
     """
     row = row.astype(mx.int64)
     perm = mx.argsort(row)
@@ -154,12 +194,34 @@ def coo_to_csr(
         if long_row_threshold is None
         else build_long_rows(rowptr, long_row_threshold, chunk_size)
     )
+    col_csr = col.astype(mx.int64)[perm]
+
+    csr_t = None
+    if transpose:
+        n_cols = num_rows if num_cols is None else num_cols
+        perm_t = mx.argsort(col_csr)  # CSR edge index of each transposed edge
+        counts_t = mx.zeros((n_cols,), dtype=mx.int32).at[col_csr].add(1)
+        rowptr_t = mx.concatenate(
+            [mx.zeros((1,), dtype=mx.int64), mx.cumsum(counts_t.astype(mx.int64))]
+        )
+        csr_t = CSRTranspose(
+            rowptr=rowptr_t,
+            col=row[perm][perm_t],
+            perm=perm_t.astype(mx.int64),
+            long_rows=(
+                None
+                if long_row_threshold is None
+                else build_long_rows(rowptr_t, long_row_threshold, chunk_size)
+            ),
+        )
+
     return CSR(
         rowptr=rowptr,
-        col=col.astype(mx.int64)[perm],
+        col=col_csr,
         values=None if values is None else values[perm],
         perm=perm,
         long_rows=long_rows,
+        transpose=csr_t,
     )
 
 
@@ -177,7 +239,8 @@ def spmm_coo(
 
     ``out[r] = reduce_{e : row[e] == r} values[e] * x[col[e]]``
 
-    GPU kernel: one thread per (edge, feature) with atomic adds.
+    GPU kernel: one thread per (edge, feature) with atomic adds (``max``/``min``
+    use integer atomics on an order-preserving encoding of the floats).
 
     Args:
         row: ``[num_edges]`` destination node of each edge.
@@ -185,14 +248,19 @@ def spmm_coo(
         x: ``[num_nodes, features]`` node features.
         values: optional ``[num_edges]`` edge weights.
         num_rows: number of output rows. Defaults to ``x.shape[0]``.
-        reduce: ``"sum"`` (or ``"add"``) or ``"mean"``.
+        reduce: how the messages ``values[e] * x[col[e]]`` arriving at a row
+            are combined, per feature: ``"sum"`` (or ``"add"``), ``"mean"``,
+            ``"max"`` or ``"min"``. Rows without edges give ``0`` for every
+            reduction. For ``"max"``/``"min"``, the gradient goes to every edge
+            whose message equals the output (ties included), as in MLX's
+            ``scatter`` max/min; ``mx.jvp`` is not supported for them.
 
     Returns:
         ``[num_rows, features]`` array with the dtype of ``x``.
     """
     reduce = _check_reduce(reduce)
     n = x.shape[0] if num_rows is None else num_rows
-    out = _spmm_coo(row, col, x, n, values, stream=stream)
+    out = _spmm_coo(row, col, x, n, values, reduce=_kernel_reduce(reduce), stream=stream)
     if reduce == "mean":
         deg = mx.zeros((n,), dtype=mx.float32).at[row].add(1.0)
         out = out / mx.maximum(deg, 1.0)[:, None]
@@ -207,6 +275,7 @@ def spmm_csr(
     reduce: SpMMReduce = "sum",
     *,
     long_rows: Optional[LongRows] = None,
+    transpose: Optional[CSRTranspose] = None,
     stream=None,
 ) -> mx.array:
     """SpMM with ``A`` given in CSR format (see :func:`coo_to_csr`).
@@ -218,30 +287,46 @@ def spmm_csr(
         col: ``[num_edges]`` source node of each edge, in CSR order.
         x: ``[num_nodes, features]`` node features.
         values: optional ``[num_edges]`` edge weights, in CSR order.
-        reduce: ``"sum"`` (or ``"add"``) or ``"mean"``.
+        reduce: how the messages ``values[e] * x[col[e]]`` arriving at a row
+            are combined, per feature: ``"sum"`` (or ``"add"``), ``"mean"``,
+            ``"max"`` or ``"min"``. Rows without edges give ``0`` for every
+            reduction. For ``"max"``/``"min"``, the gradient goes to every edge
+            whose message equals the output (ties included), as in MLX's
+            ``scatter`` max/min; ``mx.jvp`` is not supported for them.
         long_rows: optional :class:`LongRows` (``CSR.long_rows`` from
             :func:`coo_to_csr`). Strongly recommended for graphs with hub
             nodes: without it a single thread loops over each hub's edges.
+        transpose: optional :class:`CSRTranspose` (``CSR.transpose``). With
+            it, the gradient w.r.t. ``x`` uses the CSR kernel on the
+            transpose (deterministic); without it, the COO kernel.
 
     Returns:
         ``[rowptr.size - 1, features]`` array with the dtype of ``x``.
     """
     reduce = _check_reduce(reduce)
-    if long_rows is None:
-        out = _spmm_csr(rowptr, col, x, values, stream=stream)
-    else:
-        out = _spmm_csr(
-            rowptr,
-            col,
-            x,
-            values,
+    kwargs = {}
+    if long_rows is not None:
+        kwargs.update(
             long_rows=long_rows.rows,
             chunk_ptr=long_rows.chunk_ptr,
             chunk_start=long_rows.chunk_start,
             chunk_end=long_rows.chunk_end,
             long_row_threshold=long_rows.threshold,
-            stream=stream,
         )
+    if transpose is not None:
+        kwargs.update(t_rowptr=transpose.rowptr, t_col=transpose.col, t_perm=transpose.perm)
+        lt = transpose.long_rows
+        if lt is not None:
+            kwargs.update(
+                t_long_rows=lt.rows,
+                t_chunk_ptr=lt.chunk_ptr,
+                t_chunk_start=lt.chunk_start,
+                t_chunk_end=lt.chunk_end,
+                t_long_row_threshold=lt.threshold,
+            )
+    out = _spmm_csr(
+        rowptr, col, x, values, reduce=_kernel_reduce(reduce), stream=stream, **kwargs
+    )
     if reduce == "mean":
         deg = (rowptr[1:] - rowptr[:-1]).astype(mx.float32)
         out = out / mx.maximum(deg, 1.0)[:, None]

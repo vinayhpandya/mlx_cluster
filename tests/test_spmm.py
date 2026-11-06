@@ -50,9 +50,15 @@ def reference(row, col, x, values=None, num_rows=None, reduce="sum"):
 def both_formats(row, col, x, values=None, num_rows=None, reduce="sum"):
     n = x.shape[0] if num_rows is None else num_rows
     coo = spmm_coo(row, col, x, values, num_rows=n, reduce=reduce)
-    csr = coo_to_csr(row, col, n, values)
+    csr = coo_to_csr(row, col, n, values, num_cols=x.shape[0])
     out_csr = spmm_csr(
-        csr.rowptr, csr.col, x, csr.values, reduce=reduce, long_rows=csr.long_rows
+        csr.rowptr,
+        csr.col,
+        x,
+        csr.values,
+        reduce=reduce,
+        long_rows=csr.long_rows,
+        transpose=csr.transpose,
     )
     return coo, out_csr
 
@@ -115,7 +121,7 @@ def test_dtype_and_index_types(device):
     np.testing.assert_allclose(np.array(out.astype(mx.float32)), np.array(ref), atol=5e-2)
 
 
-@pytest.mark.parametrize("fmt", ["coo", "csr"])
+@pytest.mark.parametrize("fmt", ["coo", "csr", "csr_t"])
 @pytest.mark.parametrize("reduce", ["sum", "mean"])
 def test_gradients(device, fmt, reduce):
     row, col = random_graph(60, 400, seed=3)
@@ -127,8 +133,18 @@ def test_gradients(device, fmt, reduce):
     def loss_fused(x, v):
         if fmt == "coo":
             out = spmm_coo(row, col, x, v, reduce=reduce)
-        else:
+        elif fmt == "csr":  # backward on the COO kernel
             out = spmm_csr(csr.rowptr, csr.col, x, v[csr.perm], reduce=reduce)
+        else:  # "csr_t": backward on the CSR kernel via the cached transpose
+            out = spmm_csr(
+                csr.rowptr,
+                csr.col,
+                x,
+                v[csr.perm],
+                reduce=reduce,
+                long_rows=csr.long_rows,
+                transpose=csr.transpose,
+            )
         return ((out - target) ** 2).sum()
 
     def loss_ref(x, v):
@@ -185,6 +201,30 @@ def hub_graph(num_nodes=300, hub_edges=5000, other_edges=1000, seed=0):
     return mx.array(dst), mx.array(src), num_nodes
 
 
+def assert_close_to_exact(out, row, col, x, values, reduce):
+    """Compare with exact float64 maths. The hub row adds thousands of terms,
+    so after cancellation float32 rounding is relative to the size of the
+    terms, not of the (possibly small) result: scale the tolerance by
+    sum_e |w_e * x_e| per output element, i.e. a few float32 ulps of that."""
+    R, C = np.array(row), np.array(col)
+    X = np.array(x).astype(np.float64)
+    W = np.ones(R.size) if values is None else np.array(values).astype(np.float64)
+    n = X.shape[0]
+    exact = np.zeros_like(X)
+    mag = np.zeros_like(X)
+    np.add.at(exact, R, W[:, None] * X[C])
+    np.add.at(mag, R, np.abs(W[:, None] * X[C]))
+    if reduce == "mean":
+        deg = np.maximum(np.bincount(R, minlength=n), 1)[:, None]
+        exact, mag = exact / deg, mag / deg
+    err = np.abs(np.array(out).astype(np.float64) - exact)
+    bound = 1e-5 + 1e-5 * mag  # ~80 float32 ulps of the summed magnitude
+    worst = np.unravel_index(np.argmax(err - bound), err.shape)
+    assert np.all(err <= bound), (
+        f"max excess at {worst}: err={err[worst]:.3g} bound={bound[worst]:.3g}"
+    )
+
+
 def test_long_rows_metadata():
     row, col, n = hub_graph()
     csr = coo_to_csr(row, col, n, long_row_threshold=100, chunk_size=64)
@@ -224,7 +264,7 @@ def test_long_rows_forward(device, D, weighted, threshold, chunk):
         out = spmm_csr(
             csr.rowptr, csr.col, x, csr.values, reduce=reduce, long_rows=csr.long_rows
         )
-        assert_close(out, reference(row, col, x, values, reduce=reduce))
+        assert_close_to_exact(out, row, col, x, values, reduce)
 
 
 def test_long_rows_deterministic(device):
@@ -282,3 +322,314 @@ def test_build_long_rows_validation():
         build_long_rows(mx.array([0, 1]), threshold=-1)
     with pytest.raises(ValueError):
         build_long_rows(mx.array([0, 1]), chunk_size=0)
+
+
+# ---------------------------------------------------------------------------
+# Transposed CSR (backward pass on the CSR kernel)
+# ---------------------------------------------------------------------------
+
+
+def test_transpose_structure():
+    row, col = random_graph(40, 300)
+    csr = coo_to_csr(row, col, 40)
+    t = csr.transpose
+    assert t is not None
+    A = np.zeros((40, 40))
+    np.add.at(A, (np.array(row), np.array(col)), 1.0)
+    # rebuild A^T from the transposed CSR
+    At = np.zeros((40, 40))
+    rp, c = np.array(t.rowptr), np.array(t.col)
+    for r in range(40):
+        np.add.at(At, (np.full(rp[r + 1] - rp[r], r), c[rp[r] : rp[r + 1]]), 1.0)
+    np.testing.assert_array_equal(At, A.T)
+    # perm maps transposed edges to the matching CSR edges
+    np.testing.assert_array_equal(np.array(csr.col)[np.array(t.perm)], np.repeat(
+        np.arange(40), np.diff(rp)))
+
+
+def test_transpose_optional():
+    row, col = random_graph(30, 100)
+    assert coo_to_csr(row, col, 30, transpose=False).transpose is None
+
+
+def out_hub_graph(num_nodes=300, hub_edges=5000, other_edges=1000, seed=1):
+    """Node 0 SENDS `hub_edges` edges: a long row of the transpose."""
+    dst, src, n = hub_graph(num_nodes, hub_edges, other_edges, seed)
+    return src, dst, n  # swap direction
+
+
+@pytest.mark.parametrize("graph", ["in_hub", "out_hub"])
+@pytest.mark.parametrize("weighted", [False, True])
+def test_transpose_backward_matches_exact(device, graph, weighted):
+    row, col, n = hub_graph() if graph == "in_hub" else out_hub_graph()
+    x = mx.random.normal((n, 16), key=mx.random.key(0))
+    values = mx.random.uniform(shape=(row.size,), key=mx.random.key(1))
+    g_out = mx.random.normal((n, 16), key=mx.random.key(2))
+    csr = coo_to_csr(row, col, n, values if weighted else None,
+                     long_row_threshold=32, chunk_size=128)
+    lt = csr.transpose.long_rows
+    if graph == "out_hub":
+        assert lt is not None and 0 in np.array(lt.rows).tolist()
+
+    def f(x):
+        out = spmm_csr(csr.rowptr, csr.col, x, csr.values,
+                       long_rows=csr.long_rows, transpose=csr.transpose)
+        return (out * g_out).sum()
+
+    gx = mx.grad(f)(x)  # = A^T @ g_out
+    # exact float64 A^T @ g_out
+    R, C = np.array(row), np.array(col)
+    W = np.array(values).astype(np.float64) if weighted else np.ones(R.size)
+    G = np.array(g_out).astype(np.float64)
+    exact = np.zeros((n, 16)); mag = np.zeros((n, 16))
+    np.add.at(exact, C, W[:, None] * G[R]); np.add.at(mag, C, np.abs(W[:, None] * G[R]))
+    err = np.abs(np.array(gx).astype(np.float64) - exact)
+    assert np.all(err <= 1e-5 + 1e-5 * mag)
+
+
+def test_transpose_backward_deterministic(device):
+    row, col, n = out_hub_graph(hub_edges=20000)
+    x = mx.random.normal((n, 32), key=mx.random.key(0))
+    csr = coo_to_csr(row, col, n, long_row_threshold=64, chunk_size=256)
+    f = lambda x: spmm_csr(csr.rowptr, csr.col, x, long_rows=csr.long_rows,  # noqa
+                           transpose=csr.transpose).sum()
+    grads = [np.array(mx.grad(f)(x)) for _ in range(3)]
+    np.testing.assert_array_equal(grads[0], grads[1])
+    np.testing.assert_array_equal(grads[0], grads[2])
+
+
+def test_transpose_rectangular(device):
+    # 7 destination rows, 4 source nodes (x has 4 rows)
+    row = mx.array([0, 2, 2, 6, 6, 6])
+    col = mx.array([1, 0, 3, 1, 2, 3])
+    x = mx.random.normal((4, 5), key=mx.random.key(0))
+    csr = coo_to_csr(row, col, 7, num_cols=4)
+    f = lambda x: spmm_csr(csr.rowptr, csr.col, x, transpose=csr.transpose).sum()  # noqa
+    ref = mx.grad(lambda x: reference(row, col, x, num_rows=7).sum())(x)
+    assert_close(mx.grad(f)(x), ref)
+
+
+# ---------------------------------------------------------------------------
+# max / min reductions
+# ---------------------------------------------------------------------------
+
+
+def reference_maxmin(row, col, x, values=None, num_rows=None, reduce="max"):
+    """mlx-graphs' scatter max/min semantics: true max/min, 0 for empty rows.
+    Built from MLX ops, so its gradient is MLX's own (ties all get it)."""
+    n = x.shape[0] if num_rows is None else num_rows
+    msg = x[col]
+    if values is not None:
+        msg = msg * values[:, None]
+    fill = -float("inf") if reduce == "max" else float("inf")
+    base = mx.full((n, x.shape[1]), fill)
+    out = base.at[row].maximum(msg) if reduce == "max" else base.at[row].minimum(msg)
+    count = mx.zeros((n,)).at[row].add(1.0)[:, None]
+    return mx.where(count > 0, out, mx.zeros_like(out))
+
+
+def run_maxmin(fmt, row, col, x, values, n, reduce, **csr_kwargs):
+    if fmt == "coo":
+        return spmm_coo(row, col, x, values, num_rows=n, reduce=reduce)
+    csr = coo_to_csr(row, col, n, values, num_cols=x.shape[0], **csr_kwargs)
+    return spmm_csr(
+        csr.rowptr,
+        csr.col,
+        x,
+        csr.values,
+        reduce=reduce,
+        long_rows=csr.long_rows,
+        transpose=csr.transpose,
+    )
+
+
+@pytest.mark.parametrize("fmt", ["coo", "csr"])
+@pytest.mark.parametrize("reduce", ["max", "min"])
+@pytest.mark.parametrize("weighted", [False, True])
+@pytest.mark.parametrize("D", [1, 16, 33])
+def test_maxmin_forward(device, fmt, reduce, weighted, D):
+    row, col = random_graph(120, 900, power_law=True)
+    x = mx.random.normal((120, D), key=mx.random.key(1))  # mixed signs
+    values = (
+        mx.random.normal((900,), key=mx.random.key(2)) if weighted else None
+    )  # negative weights flip which message is the max
+    out = run_maxmin(fmt, row, col, x, values, 120, reduce)
+    ref = reference_maxmin(row, col, x, values, reduce=reduce)
+    # max/min pick one of the messages: results must be bit-identical
+    np.testing.assert_array_equal(np.array(out), np.array(ref))
+
+
+@pytest.mark.parametrize("fmt", ["coo", "csr"])
+@pytest.mark.parametrize("reduce", ["max", "min"])
+def test_maxmin_empty_rows_and_negatives(device, fmt, reduce):
+    # row 0: all-negative messages (true max is negative, not clamped at 0)
+    # rows 1, 3: no edges -> 0 ; row 2: a single edge ; rows 4..6: none
+    row = mx.array([0, 0, 0, 2])
+    col = mx.array([0, 1, 2, 1])
+    x = mx.array([[-3.0, 5.0], [-1.0, -7.0], [-2.0, 0.5]])
+    out = run_maxmin(fmt, row, col, x, None, 7, reduce)
+    ref = reference_maxmin(row, col, x, num_rows=7, reduce=reduce)
+    np.testing.assert_array_equal(np.array(out), np.array(ref))
+    if reduce == "max":
+        assert np.array(out)[0, 0] == -1.0
+
+
+@pytest.mark.parametrize("reduce", ["max", "min"])
+@pytest.mark.parametrize("threshold,chunk", [(0, 1), (8, 16), (100, 64)])
+def test_maxmin_long_rows(device, reduce, threshold, chunk):
+    row, col, n = hub_graph()
+    x = mx.random.normal((n, 24), key=mx.random.key(0))
+    values = mx.random.normal((row.size,), key=mx.random.key(1))
+    out = run_maxmin(
+        "csr", row, col, x, values, n, reduce,
+        long_row_threshold=threshold, chunk_size=chunk,
+    )
+    ref = reference_maxmin(row, col, x, values, reduce=reduce)
+    np.testing.assert_array_equal(np.array(out), np.array(ref))
+
+
+@pytest.mark.parametrize("fmt", ["coo", "csr"])
+@pytest.mark.parametrize("reduce", ["max", "min"])
+@pytest.mark.parametrize("weighted", [False, True])
+def test_maxmin_gradients(device, fmt, reduce, weighted):
+    row, col = random_graph(80, 600, seed=3)
+    x = mx.random.normal((80, 10), key=mx.random.key(4))
+    values = mx.random.normal((600,), key=mx.random.key(5))
+    target = mx.random.normal((80, 10), key=mx.random.key(6))
+    csr = coo_to_csr(row, col, 80, values, long_row_threshold=4, chunk_size=8)
+
+    def loss_fused(x, v):
+        w = v if weighted else None
+        if fmt == "coo":
+            out = spmm_coo(row, col, x, w, reduce=reduce)
+        else:
+            out = spmm_csr(
+                csr.rowptr, csr.col, x, None if w is None else w[csr.perm],
+                reduce=reduce, long_rows=csr.long_rows, transpose=csr.transpose,
+            )
+        return ((out - target) ** 2).sum()
+
+    def loss_ref(x, v):
+        out = reference_maxmin(row, col, x, v if weighted else None, reduce=reduce)
+        return ((out - target) ** 2).sum()
+
+    gx, gv = mx.grad(loss_fused, argnums=(0, 1))(x, values)
+    rx, rv = mx.grad(loss_ref, argnums=(0, 1))(x, values)
+    assert_close(gx, rx)
+    assert_close(gv, rv)
+
+
+@pytest.mark.parametrize("fmt", ["coo", "csr"])
+@pytest.mark.parametrize("reduce", ["max", "min"])
+def test_maxmin_ties_get_full_gradient(device, fmt, reduce):
+    # duplicate edges (0 -> 1 twice) and equal features create exact ties;
+    # MLX gives the full gradient to every tied entry, and so must we
+    row = mx.array([1, 1, 1, 0])
+    col = mx.array([0, 0, 2, 2])
+    x = mx.array([[2.0, 1.0], [9.0, 9.0], [2.0, -4.0]])
+    g = mx.array([[1.0, 1.0], [10.0, 100.0]])
+
+    def f(x):
+        return (run_maxmin(fmt, row, col, x, None, 2, reduce) * g).sum()
+
+    ref = mx.grad(lambda x: (reference_maxmin(row, col, x, num_rows=2, reduce=reduce) * g).sum())(x)
+    np.testing.assert_array_equal(np.array(mx.grad(f)(x)), np.array(ref))
+
+
+def test_maxmin_deterministic(device):
+    row, col, n = hub_graph(hub_edges=20000)
+    x = mx.random.normal((n, 32), key=mx.random.key(0))
+    csr = coo_to_csr(row, col, n, long_row_threshold=64, chunk_size=256)
+    outs = [
+        np.array(spmm_csr(csr.rowptr, csr.col, x, reduce="max", long_rows=csr.long_rows))
+        for _ in range(3)
+    ] + [np.array(spmm_coo(row, col, x, reduce="max")) for _ in range(3)]
+    for o in outs[1:]:
+        np.testing.assert_array_equal(outs[0], o)  # max is order-independent
+
+
+def test_maxmin_jvp_not_supported(device):
+    row, col = random_graph(10, 30)
+    x = mx.random.normal((10, 4), key=mx.random.key(0))
+    with pytest.raises(RuntimeError, match="jvp"):
+        mx.jvp(lambda a: spmm_coo(row, col, a, reduce="max"), [x], [x])
+
+
+def test_bad_reduce():
+    row, col = random_graph(10, 30)
+    with pytest.raises(ValueError):
+        spmm_coo(row, col, mx.ones((10, 2)), reduce="median")
+
+
+# ---------------------------------------------------------------------------
+# max / min backward on the transposed CSR
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("reduce", ["max", "min"])
+@pytest.mark.parametrize("weighted", [False, True])
+@pytest.mark.parametrize("graph", ["in_hub", "out_hub"])
+def test_maxmin_transpose_backward_matches_mlx(device, reduce, weighted, graph):
+    row, col, n = hub_graph() if graph == "in_hub" else out_hub_graph()
+    x = mx.random.normal((n, 12), key=mx.random.key(0))
+    values = mx.random.normal((row.size,), key=mx.random.key(1))
+    g_out = mx.random.normal((n, 12), key=mx.random.key(2))
+    csr = coo_to_csr(row, col, n, values if weighted else None,
+                     long_row_threshold=32, chunk_size=128)
+    if graph == "out_hub":
+        assert csr.transpose.long_rows is not None  # chunked backward path
+
+    def f(x):
+        out = spmm_csr(csr.rowptr, csr.col, x, csr.values, reduce=reduce,
+                       long_rows=csr.long_rows, transpose=csr.transpose)
+        return (out * g_out).sum()
+
+    def f_ref(x):
+        out = reference_maxmin(row, col, x, values if weighted else None,
+                               reduce=reduce)
+        return (out * g_out).sum()
+
+    assert_close(mx.grad(f)(x), mx.grad(f_ref)(x))
+
+
+@pytest.mark.parametrize("reduce", ["max", "min"])
+def test_maxmin_transpose_vs_atomic_backward(device, reduce):
+    row, col, n = out_hub_graph()
+    x = mx.random.normal((n, 20), key=mx.random.key(0))
+    values = mx.random.normal((row.size,), key=mx.random.key(1))
+    csr = coo_to_csr(row, col, n, values, long_row_threshold=16, chunk_size=64)
+
+    def grads(transpose):
+        def f(x, v):
+            return spmm_csr(csr.rowptr, csr.col, x, v, reduce=reduce,
+                            long_rows=csr.long_rows, transpose=transpose).sum()
+        return mx.grad(f, argnums=(0, 1))(x, csr.values)
+
+    gx_t, gv_t = grads(csr.transpose)  # transposed CSR kernel
+    gx_a, gv_a = grads(None)           # atomic COO-style kernel
+    assert_close(gx_t, gx_a)
+    np.testing.assert_array_equal(np.array(gv_t), np.array(gv_a))  # same kernel
+
+
+def test_maxmin_transpose_backward_deterministic(device):
+    row, col, n = out_hub_graph(hub_edges=20000)
+    x = mx.random.normal((n, 32), key=mx.random.key(0))
+    # many ties: duplicated feature values make several edges win at once
+    x = mx.round(x * 2) / 2
+    csr = coo_to_csr(row, col, n, long_row_threshold=64, chunk_size=256)
+    f = lambda x: spmm_csr(csr.rowptr, csr.col, x, reduce="max",  # noqa: E731
+                           long_rows=csr.long_rows, transpose=csr.transpose).sum()
+    grads = [np.array(mx.grad(f)(x)) for _ in range(3)]
+    np.testing.assert_array_equal(grads[0], grads[1])
+    np.testing.assert_array_equal(grads[0], grads[2])
+
+
+def test_maxmin_transpose_rectangular(device):
+    row = mx.array([0, 2, 2, 6, 6, 6])
+    col = mx.array([1, 0, 3, 1, 2, 3])
+    x = mx.random.normal((4, 5), key=mx.random.key(0))
+    csr = coo_to_csr(row, col, 7, num_cols=4)
+    f = lambda x: spmm_csr(csr.rowptr, csr.col, x, reduce="max",  # noqa: E731
+                           transpose=csr.transpose).sum()
+    ref = mx.grad(lambda x: reference_maxmin(row, col, x, num_rows=7).sum())(x)
+    assert_close(mx.grad(f)(x), ref)

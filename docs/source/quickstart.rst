@@ -98,11 +98,35 @@ For GraphSAGE-style neighbor sampling:
 
    print(f"Sampled {len(samples)} nodes and {len(edges)} edges")
 
+Sparse Matrix Multiplication
+----------------------------
+
+Aggregate neighbour features without building a per-edge message array:
+
+.. code-block:: python
+
+   import mlx.core as mx
+   from mlx_cluster import coo_to_csr, spmm_coo, spmm_csr
+
+   src, dst = edge_index[0], edge_index[1]          # mlx-graphs convention
+   x = mx.random.normal((num_nodes, 64))
+
+   # sum / mean / max / min of incoming neighbour features
+   out = spmm_coo(dst, src, x, num_rows=num_nodes, reduce="mean")
+
+   # CSR: build once per graph, faster on medium/large graphs
+   csr = coo_to_csr(dst, src, num_nodes)
+   out = spmm_csr(csr.rowptr, csr.col, x, reduce="max",
+                  long_rows=csr.long_rows, transpose=csr.transpose)
+
+See :doc:`sparse` for details.
+
 Key Features
 ------------
 
 * **MLX Optimized**: Built specifically for Apple's MLX framework
 * **Fast Performance**: Optimized for Apple Silicon hardware with GPU support(Only random walks)
 * **Graph Algorithms**: Random walks, biased random walks, and neighbor sampling
+* **Fused message passing**: SpMM (sum/mean/max/min) with gradients, on GPU
 * **Flexible**: Support for both directed and undirected graphs
 * **Memory Efficient**: Efficient CSR/CSC graph representations
