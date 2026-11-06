@@ -23,8 +23,11 @@ jobs:
     - name: Install package and dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install -e . --verbose
-        python -m pip install '.[test]'
+        python -m pip install "mlx>=0.32" nanobind==3.1.0 "cmake>=3.24" setuptools
+        MLX_VERSION=$(python -c "import mlx.core as mx; print(mx.__version__)")
+        echo "mlx==$MLX_VERSION" > constraints.txt
+        python -m pip install --no-build-isolation -c constraints.txt -e ".[test]" --verbose
+        python -c "import mlx.core as mx, mlx_cluster; print('mlx', mx.__version__, 'ok')"
     - name: Run tests with pytest
       run: |
         pytest tests
