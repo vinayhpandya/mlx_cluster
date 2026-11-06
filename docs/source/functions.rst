@@ -33,9 +33,12 @@ See :doc:`sparse` for an overview, conventions and performance notes.
 
 .. autoclass:: mlx_cluster.CSR
    :no-members:
+   :exclude-members: __init__, __new__
 
 .. autoclass:: mlx_cluster.CSRTranspose
-   :no-members:
+    :no-members:
+    :exclude-members: __init__, __new__
 
 .. autoclass:: mlx_cluster.LongRows
-   :no-members:
+    :no-members:
+    :exclude-members: __init__, __new__
